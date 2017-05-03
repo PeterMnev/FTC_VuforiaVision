@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/FTC_2016-2017.iml" filepath="$PROJECT_DIR$/FTC_2016-2017.iml" />
-      <module fileurl="file://$PROJECT_DIR$/FTC_VUFORIA.iml" filepath="$PROJECT_DIR$/FTC_VUFORIA.iml" />
       <module fileurl="file://$PROJECT_DIR$/FtcRobotController/FtcRobotController.iml" filepath="$PROJECT_DIR$/FtcRobotController/FtcRobotController.iml" />
       <module fileurl="file://$PROJECT_DIR$/RMRobotics/RMRobotics.iml" filepath="$PROJECT_DIR$/RMRobotics/RMRobotics.iml" />
       <module fileurl="file://$PROJECT_DIR$/imagenav/imagenav.iml" filepath="$PROJECT_DIR$/imagenav/imagenav.iml" />
