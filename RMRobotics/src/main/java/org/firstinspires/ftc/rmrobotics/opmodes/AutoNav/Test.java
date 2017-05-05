@@ -191,56 +191,19 @@ public class Test extends LinearOpMode {
 // Start here
         // Start the engine!!!
         // 1 encoder tick ~ 1 mm
-
+        ADBLog("started the programmmm!!!!");
         try {
             ADBLogReset();
+            ADBLog("Start");
+            new Thread(drive).start();
+
             ADBLog("Start test");
+            ADBLog("Drive forwards a little bit");
 
-            int p = -drive.testFrontLeft(1);
-            sleep(1000);
-            p += drive.testFrontLeft(0.0);
-            telemetry.addData("Front Left", p);
+            drive.DriveByEncoders(0 * dir, 0.2, 200);
 
-            sleep(1000);
-
-            p = -drive.testFrontRight(1);
-            sleep(1000);
-            p += drive.testFrontRight(0.0);
-            telemetry.addData("Front Right", p);
-            sleep(1000);
-
-            p = -drive.testBackLeft(1);
-            sleep(1000);
-            p += drive.testBackLeft(0.0);
-            telemetry.addData("Back Left", p);
-            sleep(1000);
-
-            p = -drive.testBackRight(1);
-            sleep(1000);
-            p += drive.testBackRight(0.0);
-            telemetry.addData("Back Rigth", p);
-            sleep(1000);
-            telemetry.update();
-
-            rightPusher.setPosition(0.9);
-            leftPusher.setPower(-1);
-            sleep(1000);
-            leftPusher.setPower(0);
-            rightPusher.setPosition(0);
-            leftPusher.setPower(1);
-            sleep(1500);
-
-            latch.setPosition(1);
-            sleep(500);
-            latch.setPosition(0.5);
-            sleep(500);
-
-            shootL.setPower(-1);
-            shootR.setPower(-1);
-            sleep(1000);
-            shootL.setPower(0);
-            shootR.setPower(0);
-
+            ADBLog("rotate 90 degrees");
+            drive.TurnToAngle(90 * dir);
             stop();
 
 

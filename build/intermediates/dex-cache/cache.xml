@@ -3,6 +3,15 @@
 
     <item
         is-multidex="false"
+        jar="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\FtcRobotController\build\intermediates\bundles\default\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="cf9130be8584cc6826ad3fa302d7310e1175107c">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_eb3381502860a2410a68b321ae637aed58060479.jar" />
+    </item>
+    <item
+        is-multidex="false"
         jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\FTC_2016-2017\openCVLibrary320\unspecified\jars\classes.jar"
         jumboMode="false"
         optimize="true"
@@ -12,21 +21,57 @@
     </item>
     <item
         is-multidex="false"
-        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\Inspection-release\jars\classes.jar"
+        jar="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\openCVLibrary320\build\intermediates\bundles\default\classes.jar"
         jumboMode="false"
         optimize="true"
-        revision="23.0.3"
-        sha1="570af40926df6da6583541643ab6e29379f6592a">
-        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-Inspection-release_3406057caf1e326bf8b3288dc6394dd5a1f42771.jar" />
+        revision="25.0.0"
+        sha1="50b6438f34cd01b96afb8dc72d6103a2f339ed35">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_1ed35c0325970f040b36e6647c759dcfe3a04531.jar" />
     </item>
     <item
         is-multidex="false"
-        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\Blocks-release\jars\classes.jar"
+        jar="C:\Users\Peter\.android\build-cache\a411695a9fa93a2d5816d2d110fb98257977ea78\output\jars\libs\support-annotations-23.4.0.jar"
         jumboMode="false"
         optimize="true"
-        revision="23.0.3"
-        sha1="793266999e8614c9386a3b5c0dda79f6d40ef29d">
-        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-Blocks-release_179b9e507c137b5e5faf4348be330f34d3af1f7c.jar" />
+        revision="25.0.0"
+        sha1="754b74908e45e98119eaca37955bffe0ec04e738">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\support-annotations-23.4.0_aea8e86bdf5908b233b71d48152c2a46d8373287.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\.android\build-cache\47e2ba14e3725a28695fdd504cfaf6fb9237c331\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="570af40926df6da6583541643ab6e29379f6592a">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_bdd44c7ea3d71ad02a77b5966de384f388de81b4.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\.android\build-cache\61890b33cac0fc2dcfcd5c620bcaec713e2b1b72\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="9403be210676ed196cdcc64c7391b9ae2361c174">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_c75099bc649e74af632ddf66fe669f3d1b879c97.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\.android\build-cache\82a9618ebbf6561e5617487a49e80b9a77be308f\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="01999c87afe3d10ffa06f3efa66f39e61e6aba0c">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_aa6289186e8d59b3d8b5aa8acc9ca283312199bc.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\.android\build-cache\1515369cb282b4f6090943b806ef7fe8472548a3\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="72a10d2e9a24839b4ed93897d9e1f0d7ba06ff7c">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_524f5d558dde18b0e4d0b83deba3adf1a7ccc94d.jar" />
     </item>
     <item
         is-multidex="false"
@@ -36,15 +81,6 @@
         revision="23.0.3"
         sha1="754b74908e45e98119eaca37955bffe0ec04e738">
         <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\support-annotations-23.4.0_9b0a8d72345c7edbe6be9030cb36e168210d2985.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\Analytics-release\jars\classes.jar"
-        jumboMode="false"
-        optimize="true"
-        revision="23.0.3"
-        sha1="9dafed45e330aec14abcce05bdb7bbdb2a2d7092">
-        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-Analytics-release_1bf013e4b032e256ec5b413e281c20bc3ab9574a.jar" />
     </item>
     <item
         is-multidex="false"
@@ -63,6 +99,114 @@
         revision="23.0.3"
         sha1="acc80693304804c095a55c4c18833280483f8989">
         <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-RobotCore-release_f9228932c09db7ec48131c1b1089f483904aea38.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\.android\build-cache\a411695a9fa93a2d5816d2d110fb98257977ea78\output\jars\libs\d2xx.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="19d12079ae2fe9e2638af957127cdf7d5772b21f">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\d2xx_86773532a8abeacf6768e5135dfb4540b3f9198c.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\.android\build-cache\991fb803f28a3c4c6271c0cc405a46601f5df559\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="59e80a673ef1609836508cf2dbcfe5006d291e13">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_51088a0ab782679f543b13598e2ce7e5ad2197f3.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\Hardware-release\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.3"
+        sha1="cc1f468db4fe00126f613aa4b73c2cc53938f7f0">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-Hardware-release_4d7c03c76f20a1215a45779bb9ff2048d7f553d3.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\.android\build-cache\a411695a9fa93a2d5816d2d110fb98257977ea78\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="acc80693304804c095a55c4c18833280483f8989">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_358a4c56342c43941d948cfa9edf53143a92da07.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\navx_ftc-release\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.3"
+        sha1="59e80a673ef1609836508cf2dbcfe5006d291e13">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-navx_ftc-release_c50bb8abc5051dc1d6e4cb64643afce3f247c140.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\FTC_2016-2017\imagenav\unspecified\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.3"
+        sha1="3fe5042ea4dbc5a8d892798f7a54498aebb285ce">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\FTC_2016-2017-imagenav-unspecified_ff25253410ae2f4d65057290886ceb207a54cb2d.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\Inspection-release\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.3"
+        sha1="570af40926df6da6583541643ab6e29379f6592a">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-Inspection-release_3406057caf1e326bf8b3288dc6394dd5a1f42771.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\.android\build-cache\e166b98357082c01ded148725905ea90c337ab59\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="793266999e8614c9386a3b5c0dda79f6d40ef29d">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_701e7ce29f93bb9ce5c3e00e3e1d8d5a49c22867.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\imagenav\build\intermediates\bundles\default\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="3fe5042ea4dbc5a8d892798f7a54498aebb285ce">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_d57b2f6030fc3e864ce612842b1ea04c49203d5c.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\Blocks-release\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.3"
+        sha1="793266999e8614c9386a3b5c0dda79f6d40ef29d">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-Blocks-release_179b9e507c137b5e5faf4348be330f34d3af1f7c.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\Analytics-release\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="23.0.3"
+        sha1="9dafed45e330aec14abcce05bdb7bbdb2a2d7092">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-Analytics-release_1bf013e4b032e256ec5b413e281c20bc3ab9574a.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\.android\build-cache\a411695a9fa93a2d5816d2d110fb98257977ea78\output\jars\libs\gson-2.7.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="dc906452915bfeaccaf5b15b482a091a41c38643">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\gson-2.7_8422b0d105a677dce1f3a6b30244d1092d004b9b.jar" />
     </item>
     <item
         is-multidex="false"
@@ -93,12 +237,12 @@
     </item>
     <item
         is-multidex="false"
-        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\Hardware-release\jars\classes.jar"
+        jar="C:\Users\Peter\.android\build-cache\f6b2e8bd8a51311b7f929db14be414a4edd08dec\output\jars\classes.jar"
         jumboMode="false"
         optimize="true"
-        revision="23.0.3"
+        revision="25.0.0"
         sha1="cc1f468db4fe00126f613aa4b73c2cc53938f7f0">
-        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-Hardware-release_4d7c03c76f20a1215a45779bb9ff2048d7f553d3.jar" />
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_76918767c53e71d4c459f5f9ae3bcd8d6c882b07.jar" />
     </item>
     <item
         is-multidex="false"
@@ -120,12 +264,21 @@
     </item>
     <item
         is-multidex="false"
-        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\navx_ftc-release\jars\classes.jar"
+        jar="C:\Users\Peter\.android\build-cache\a411695a9fa93a2d5816d2d110fb98257977ea78\output\jars\libs\Vuforia.jar"
         jumboMode="false"
         optimize="true"
-        revision="23.0.3"
-        sha1="59e80a673ef1609836508cf2dbcfe5006d291e13">
-        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\intermediates-exploded-aar-navx_ftc-release_c50bb8abc5051dc1d6e4cb64643afce3f247c140.jar" />
+        revision="25.0.0"
+        sha1="fe1faea782b8a46a7540b228384378bd41bfc9e6">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\Vuforia_0f547a13351f149bbed37feded2b302661cdb12c.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\Peter\.android\build-cache\17b4dc41c3c1057ee7b24025546d6756bc4927ee\output\jars\classes.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.0"
+        sha1="9dafed45e330aec14abcce05bdb7bbdb2a2d7092">
+        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_VUFORIA\RMRobotics\build\intermediates\pre-dexed\debug\classes_3b982c1bc29ae70c3adcf1d16027f0d5fea86e96.jar" />
     </item>
     <item
         is-multidex="false"
@@ -135,15 +288,6 @@
         revision="23.0.3"
         sha1="fe1faea782b8a46a7540b228384378bd41bfc9e6">
         <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\Vuforia_3f3bf00d2647c18d03451b0aa5bf076487544b7f.jar" />
-    </item>
-    <item
-        is-multidex="false"
-        jar="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\exploded-aar\FTC_2016-2017\imagenav\unspecified\jars\classes.jar"
-        jumboMode="false"
-        optimize="true"
-        revision="23.0.3"
-        sha1="3fe5042ea4dbc5a8d892798f7a54498aebb285ce">
-        <dex dex="C:\Users\Peter\Downloads\Robots\FTC_2016-2017\RMRobotics\build\intermediates\pre-dexed\debug\FTC_2016-2017-imagenav-unspecified_ff25253410ae2f4d65057290886ceb207a54cb2d.jar" />
     </item>
 
 </items>
