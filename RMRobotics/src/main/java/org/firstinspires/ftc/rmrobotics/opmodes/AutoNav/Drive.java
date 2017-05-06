@@ -36,7 +36,6 @@ public class Drive implements Runnable {
     // Declaring Navx PID Variables
     private ZPIDController yawPIDController;
     private ZPIDController.PIDResult yawPIDResult;
-    private final double TARGET_ANGLE_DEGREES = 0.0;
     private final double TOLERANCE_DEGREES = 2.0;
     private final double MIN_MOTOR_OUTPUT_VALUE = -1;
     private final double MAX_MOTOR_OUTPUT_VALUE = 1;
@@ -113,17 +112,17 @@ public class Drive implements Runnable {
                 telemetry.update();
             }
         }
+
+        // Reset yaw
         navx_device.zeroYaw();
 
         //initalize a PID controller
-        yawPIDController = new ZPIDController(navx_device,
-                navXPIDController.navXTimestampedDataSource.YAW);
+        yawPIDController = new ZPIDController(navx_device);
 
-        /* Configure the PID controller */
-        yawPIDController.setSetpoint(TARGET_ANGLE_DEGREES);
-        yawPIDController.setContinuous(true);
+        /* Configure yaw PID controller */
+        yawPIDController.setSetpoint(0);
         yawPIDController.setOutputRange(MIN_MOTOR_OUTPUT_VALUE / 2, MAX_MOTOR_OUTPUT_VALUE / 2);
-        yawPIDController.setTolerance(navXPIDController.ToleranceType.ABSOLUTE, TOLERANCE_DEGREES);
+        yawPIDController.setTolerance(TOLERANCE_DEGREES);
         yawPIDController.setP(YAW_PID_P);
         yawPIDController.enable(true);
         yawPIDResult = new ZPIDController.PIDResult();
@@ -170,7 +169,7 @@ public class Drive implements Runnable {
             while (opmode.opModeIsActive()) {
 //                BetterDarudeAutoNav.ADBLog("TurnToAngle: Yaw=" + navx_device.getYaw() + ", AV=" + yawPIDController.angular_velocity);
                 if (Math.abs(navx_device.getYaw() - heading) < TOLERANCE_DEGREES
-                        && Math.abs(yawPIDController.angular_velocity) < 0.01) break;
+                        && Math.abs(yawPIDController.getAV()) < 0.01) break;
                 sleep(20);
             }
         } catch (InterruptedException ex) {
@@ -242,8 +241,6 @@ public class Drive implements Runnable {
     public volatile boolean running = true;
 
     public void run() {
-
-
         while (running && opmode.opModeIsActive()) {
             //Places reqV into powV - now moves to that
             if (newReq) {
@@ -332,7 +329,7 @@ public class Drive implements Runnable {
 
         //This is used for rotating to the desired angle. note the details of PID controller that set it
         try {
-            yawPIDController.moving = moving;
+            yawPIDController.setMoving(moving);
             if (yawPIDController.waitForNewUpdate(yawPIDResult, GYRO_DEVICE_TIMEOUT_MS)) {
                 double av = yawPIDResult.angular_velocity;
                 double error = yawPIDResult.error;

@@ -10,13 +10,9 @@ import com.kauailabs.navx.ftc.IDataArrivalSubscriber;
 
 public class ZPIDController implements IDataArrivalSubscriber {
     private final Object sync_event = new Object();
-    private boolean timestamped = true;
-    com.kauailabs.navx.ftc.navXPIDController.navXTimestampedDataSource timestamped_src;
-    com.kauailabs.navx.ftc.navXPIDController.navXUntimestampedDataSource untimestamped_src;
-    AHRS navx_device;
-    long last_system_timestamp = 0L;
-    long last_sensor_timestamp = 0L;
-    long prev_sensor_timestamp = 0L;
+    private AHRS navx_device;
+    private long last_sensor_timestamp = 0L;
+    private long prev_sensor_timestamp = 0L;
     private double error_current = 0.0D;
     private double error_previous = 0.0D;
     private double error_total = 0.0D;
@@ -28,66 +24,51 @@ public class ZPIDController implements IDataArrivalSubscriber {
     private double min_input = 0.0D;
     private double max_output = 1.0D;
     private double min_output = -1.0D;
-    private com.kauailabs.navx.ftc.navXPIDController.ToleranceType tolerance_type;
-    double tolerance_amount;
-    private boolean continuous = false;
+    private double tolerance_amount;
     private boolean enabled = false;
     private double setpoint = 0.0D;
     private double result = 0.0D;
 
-    public volatile boolean moving = false;
+    private boolean moving = false; // Is robot currently commanded to move
+    private double angular_velocity = 0.0D;
+    private double prev_process_value = 0;
 
-    public double angular_velocity = 0.0D;
-    public double prev_process_value = 0;
+    // These two methods are callbacks from IDataArrivalSubscriber interface.
+    // NavX thread calls them when new data are available from sensor.
+    // We don't use untimestamped callback, since we expect navX micro to give timestamps/
+    public void untimestampedDataReceived(long curr_system_timestamp, Object kind) {}
 
-    public void untimestampedDataReceived(long curr_system_timestamp, Object kind) {
+    // curr_sensor_timestamp is a time when data was measured by sensor, not when it was received
+    // by processing thread.
+    // This method is running in navX thread and needs to be synchronized with drive thread.
+    // We synchronize it with reading results from controller, to make sure no partial results
+    // are read.
+    public synchronized void timestampedDataReceived(long curr_system_timestamp, long curr_sensor_timestamp, Object kind) {
+        if(enabled && kind.getClass() == AHRS.DeviceDataType.class) {
+            double process_value = (double)navx_device.getYaw(); // controlled parameter
 
-    }
-
-    public void timestampedDataReceived(long curr_system_timestamp, long curr_sensor_timestamp, Object kind) {
-        if(this.enabled && kind.getClass() == AHRS.DeviceDataType.class) {
-            double process_value;
-            switch(this.timestamped_src.ordinal()) {
-                case 0:
-                    process_value = (double)this.navx_device.getYaw();
-                    break;
-                default:
-                    process_value = 0.0D;
-            }
-
-            last_system_timestamp = curr_system_timestamp;
             prev_sensor_timestamp = last_sensor_timestamp;
             last_sensor_timestamp = curr_sensor_timestamp;
-            stepController(process_value, 0);
-            synchronized(this.sync_event) {
-                this.sync_event.notify();
-            }
+
+            // Calculate new control value
+            stepController(process_value);
+
+            // Notify drive thread that new control value is available
+            notifyAll();
         }
     }
 
-    public void yawReset() {
-        if(this.timestamped && this.timestamped_src == com.kauailabs.navx.ftc.navXPIDController.navXTimestampedDataSource.YAW) {
+    public synchronized void yawReset() {
             this.last_sensor_timestamp = 0L;
             this.error_current = 0.0D;
             this.error_previous = 0.0D;
             this.error_total = 0.0D;
             this.result = 0.0D;
-        }
-
     }
 
-    public ZPIDController(AHRS navx_device, com.kauailabs.navx.ftc.navXPIDController.navXTimestampedDataSource src) {
+    public ZPIDController(AHRS navx_device) {
         this.navx_device = navx_device;
-        this.timestamped = true;
-        this.timestamped_src = src;
         this.setInputRange(-180.0D, 180.0D);
-        navx_device.registerCallback(this);
-    }
-
-    public ZPIDController(AHRS navx_device, com.kauailabs.navx.ftc.navXPIDController.navXUntimestampedDataSource src) {
-        this.navx_device = navx_device;
-        this.timestamped = false;
-        this.untimestamped_src = src;
         navx_device.registerCallback(this);
     }
 
@@ -96,15 +77,18 @@ public class ZPIDController implements IDataArrivalSubscriber {
         this.navx_device.deregisterCallback(this);
     }
 
-    public boolean isNewUpdateAvailable(ZPIDController.PIDResult result) {
+    // Checking weather PID controller have newer data, comparing to provided 'result'.
+    // If yes, return true and store data into result.
+    // This function does not block thread that calls it.
+    public synchronized boolean isNewUpdateAvailable(ZPIDController.PIDResult result) {
         boolean new_data_available;
-        if(this.enabled && result.timestamp < this.last_sensor_timestamp) {
+        if(enabled && result.timestamp < last_sensor_timestamp) {
             new_data_available = true;
-            result.on_target = this.isOnTarget();
-            result.output = this.get();
-            result.timestamp = this.last_sensor_timestamp;
-            result.angular_velocity = this.angular_velocity;
-            result.error = this.error_current;
+            result.on_target = isOnTarget();
+            result.output = get();
+            result.timestamp = last_sensor_timestamp;
+            result.angular_velocity = angular_velocity;
+            result.error = error_current;
         } else {
             new_data_available = false;
         }
@@ -112,30 +96,27 @@ public class ZPIDController implements IDataArrivalSubscriber {
         return new_data_available;
     }
 
-    public boolean waitForNewUpdate(ZPIDController.PIDResult result, int timeout_ms) throws InterruptedException {
-//        BetterDarudeAutoNav.ADBLog("Wait 1");
-        boolean ready = this.isNewUpdateAvailable(result);
-//        BetterDarudeAutoNav.ADBLog("Wait 2");
-        if(!ready && !Thread.currentThread().isInterrupted()) {
-            Object var4 = this.sync_event;
-            synchronized(this.sync_event) {
-                this.sync_event.wait((long)timeout_ms);
-            }
+    // Block calling thread until new data available from sensor and control value is calculated.
+    public synchronized boolean waitForNewUpdate(ZPIDController.PIDResult result, int timeout_ms) throws InterruptedException {
+        // If new data already available, return it immediately
+        boolean ready = isNewUpdateAvailable(result);
 
-            ready = this.isNewUpdateAvailable(result);
+        // Exit loop when new data are available or thread is being interrupted.
+        if(!ready && !Thread.currentThread().isInterrupted()) {
+            // Yield lock to callback method
+            wait((long)timeout_ms);
+            ready = isNewUpdateAvailable(result);
         }
-//        BetterDarudeAutoNav.ADBLog("Wait 3");
 
         return ready;
     }
 
     public double getError() {
-        return this.error_current;
+        return error_current;
     }
 
-    public synchronized void setTolerance(com.kauailabs.navx.ftc.navXPIDController.ToleranceType tolerance_type, double tolerance_amount) {
+    public synchronized void setTolerance(double tolerance_amount) {
         this.tolerance_amount = tolerance_amount;
-        this.tolerance_type = tolerance_type;
     }
 
     public boolean isOnTarget() {
@@ -145,19 +126,18 @@ public class ZPIDController implements IDataArrivalSubscriber {
         return on_target;
     }
 
-    public double stepController(double process_variable, int num_missed_samples) {
-        synchronized(this) {
-            double adjP = this.p;
+    // Calculates control values. This method is called from navX callback and synchronized by its
+    // lock.
+    public double stepController(double process_variable) {
+            error_current = setpoint - process_variable;
             double absErr = Math.abs(error_current);
+            angular_velocity = (process_variable - prev_process_value)/
+                    (last_sensor_timestamp - prev_sensor_timestamp);
 
-            this.error_current = this.setpoint - process_variable;
-
-            angular_velocity = process_variable - prev_process_value;
-            angular_velocity /= last_sensor_timestamp - prev_sensor_timestamp;
             double dump = 1;
 
             if(angular_velocity == 0.0 || Math.signum(angular_velocity) == Math.signum(error_current)) {
-                // Correcting
+                // Turning in the right direction
                 if(!moving) {
                     if (Math.abs(angular_velocity) > 0.11 && absErr < 30) {
                         dump = 0; // brake
@@ -184,37 +164,36 @@ public class ZPIDController implements IDataArrivalSubscriber {
 
 //                else if(absErr < 20) adjP /=1.7;
             } else {
-                // Moving in the wrong direction, apply maz correction
+                // Turning in the wrong direction, apply maz correction
                 if(Math.abs(angular_velocity) > 0.02) dump = 10;
             }
 //            BetterDarudeAutoNav.ADBLog("av: " + angular_velocity + ", err: " + absErr + ", dump: " + dump + ", mov: " + moving);
 
-            double estimated_i;
-            if(this.continuous) {
-                estimated_i = this.max_input - this.min_input;
-                if(Math.abs(this.error_current) > estimated_i / 2.0D) {
-                    if(this.error_current > 0.0D) {
-                        this.error_current -= estimated_i;
-                    } else {
-                        this.error_current += estimated_i;
-                    }
-                }
-            }
+//            double inp_range;
+//            if(continuous) {
+//                inp_range = max_input - min_input;
+//                if(absErr > inp_range / 2.0D) {
+//                    if(error_current > 0.0D) {
+//                        error_current -= inp_range;
+//                    } else {
+//                        error_current += inp_range;
+//                    }
+//                }
+//            }
 
-            result = adjP * this.error_current * dump;
+            result = p * error_current * dump;
 
-            this.error_previous = this.error_current;
+            error_previous = error_current;
 
-            if(this.result > this.max_output) {
-                this.result = this.max_output;
-            } else if(this.result < this.min_output) {
-                this.result = this.min_output;
+            if(result > max_output) {
+                result = max_output;
+            } else if(result < min_output) {
+                result = min_output;
             }
 
             prev_process_value = process_variable;
 
-            return this.result;
-        }
+            return result;
     }
 
     public synchronized void setP(double p) {
@@ -222,13 +201,8 @@ public class ZPIDController implements IDataArrivalSubscriber {
 //        this.stepController(this.error_previous, 0);
     }
 
-    public synchronized void setContinuous(boolean continuous) {
-        this.continuous = continuous;
-//        this.stepController(this.error_previous, 0);
-    }
-
     public synchronized double get() {
-        return this.result;
+        return result;
     }
 
     public synchronized void setOutputRange(double min_output, double max_output) {
@@ -244,18 +218,18 @@ public class ZPIDController implements IDataArrivalSubscriber {
         if(min_input <= max_input) {
             this.min_input = min_input;
             this.max_input = max_input;
-            this.setSetpoint(this.setpoint);
+            setSetpoint(setpoint);
         }
     }
 
     public synchronized void setSetpoint(double setpoint) {
-        if(this.max_input > this.min_input) {
-            if(setpoint > this.max_input) {
-                this.setpoint = this.max_input;
-            } else if(setpoint < this.min_input) {
-                this.setpoint = this.min_input;
+        if(max_input > min_input) {
+            if(setpoint > max_input) {
+                setpoint = max_input;
+            } else if(setpoint < min_input) {
+                setpoint = min_input;
             } else {
-                this.setpoint = setpoint;
+                setpoint = setpoint;
             }
         } else {
             this.setpoint = setpoint;
@@ -267,6 +241,11 @@ public class ZPIDController implements IDataArrivalSubscriber {
     public synchronized double getSetpoint() {
         return this.setpoint;
     }
+
+    public synchronized double getAV() { return angular_velocity; }
+    public synchronized double getErr() { return error_current; }
+
+    public synchronized void setMoving(boolean m) { moving = m; }
 
     public synchronized void enable(boolean enabled) {
         this.enabled = enabled;
@@ -286,45 +265,6 @@ public class ZPIDController implements IDataArrivalSubscriber {
         this.error_previous = 0.0D;
         this.error_total = 0.0D;
         this.result = 0.0D;
-    }
-
-    public static enum ToleranceType {
-        NONE,
-        PERCENT,
-        ABSOLUTE;
-
-        private ToleranceType() {
-        }
-    }
-
-    public static enum navXUntimestampedDataSource {
-        RAW_GYRO_X,
-        RAW_GYRO_Y,
-        RAW_GYRO_Z,
-        RAW_ACCEL_X,
-        RAW_ACCEL_Y,
-        RAW_ACCEL_Z,
-        RAW_MAG_X,
-        RAW_MAG_Y,
-        RAW_MAG_Z;
-
-        private navXUntimestampedDataSource() {
-        }
-    }
-
-    public static enum navXTimestampedDataSource {
-        YAW,
-        PITCH,
-        ROLL,
-        COMPASS_HEADING,
-        FUSED_HEADING,
-        ALTITUDE,
-        LINEAR_ACCEL_X,
-        LINEAR_ACCEL_Y,
-        LINEAR_ACCEL_Z;
-
-        private navXTimestampedDataSource() {
-        }
     }
 
     public static class PIDResult {
@@ -352,14 +292,6 @@ public class ZPIDController implements IDataArrivalSubscriber {
         }
         public double getOutput() {
             return this.output;
-        }
-    }
-
-    public static enum TimestampType {
-        SENSOR,
-        SYSTEM;
-
-        private TimestampType() {
         }
     }
 }
