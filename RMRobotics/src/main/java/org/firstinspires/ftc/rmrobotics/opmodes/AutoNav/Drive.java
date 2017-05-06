@@ -155,7 +155,7 @@ public class Drive implements Runnable {
         while (opmode.opModeIsActive()) {
             int d = getDistance();
             if (d > distance) break;
-//            BetterDarudeAutoNav.ADBLog("Dist: " + d);
+            BetterDarudeAutoNav.ADBLog("Dist: " + d);
             opmode.sleep(5);
         }
     }
@@ -167,7 +167,7 @@ public class Drive implements Runnable {
 
         try {
             while (opmode.opModeIsActive()) {
-//                BetterDarudeAutoNav.ADBLog("TurnToAngle: Yaw=" + navx_device.getYaw() + ", AV=" + yawPIDController.angular_velocity);
+                BetterDarudeAutoNav.ADBLog("TurnToAngle: Yaw=" + navx_device.getYaw() + ", AV=" + yawPIDController.getAV());
                 if (Math.abs(navx_device.getYaw() - heading) < TOLERANCE_DEGREES
                         && Math.abs(yawPIDController.getAV()) < 0.01) break;
                 sleep(20);
@@ -342,8 +342,8 @@ public class Drive implements Runnable {
                     frontRight.setPower(frp);
                     backLeft.setPower(blp);
                     backRight.setPower(brp);
-//                    BetterDarudeAutoNav.ADBLog("On target motor speed: fl,br:" + flp + ", fr,bl: " + frp
-//                            + ", err: " + error + ", av= " + av);
+                   BetterDarudeAutoNav.ADBLog("On target motor speed: fl,br:" + flp + ", fr,bl: " + frp
+                            + ", err: " + error + ", av= " + av);
                 } else {
                     double output = yawPIDResult.getOutput();
                     double flp = Xr;
@@ -359,8 +359,8 @@ public class Drive implements Runnable {
                     frontRight.setPower(frp - output);
                     backLeft.setPower(blp + output);
                     backRight.setPower(brp - output);
-//                    BetterDarudeAutoNav.ADBLog("Motor speed: fl,br:" + flp + ", fr,bl: " + frp
-//                            + ", err: " + error + ",out: " + output + ", av= " + av);
+                    BetterDarudeAutoNav.ADBLog("Motor speed: fl,br:" + flp + ", fr,bl: " + frp
+                            + ", err: " + error + ",out: " + output + ", av= " + av);
                 }
                 // Calculate odometer
 //                double a = Math.toRadians(yawPIDController.prev_process_value);

@@ -225,11 +225,11 @@ public class ZPIDController implements IDataArrivalSubscriber {
     public synchronized void setSetpoint(double setpoint) {
         if(max_input > min_input) {
             if(setpoint > max_input) {
-                setpoint = max_input;
+                this.setpoint = max_input;
             } else if(setpoint < min_input) {
-                setpoint = min_input;
+                this.setpoint = min_input;
             } else {
-                setpoint = setpoint;
+                this.setpoint = setpoint;
             }
         } else {
             this.setpoint = setpoint;
