@@ -52,7 +52,7 @@ public class Test extends LinearOpMode {
 
     private RMVuforia vuforia;
 
-    private Drive drive = null;
+    private BrokeeenDriveClass drive = null;
 
     //servo
     CRServo leftPusher;
@@ -160,7 +160,7 @@ public class Test extends LinearOpMode {
                 false);
         rangeSensor.engage();
         //drive class for big roboto
-        drive = new Drive(
+        drive = new BrokeeenDriveClass(
                 frontLeft,
                 frontRight,
                 backLeft,
@@ -195,7 +195,7 @@ public class Test extends LinearOpMode {
         try {
             ADBLogReset();
             ADBLog("Start");
-            new Thread(drive).start();
+
 
             ADBLog("Start test");
             ADBLog("Drive forwards a little bit");
@@ -209,7 +209,7 @@ public class Test extends LinearOpMode {
 
         } finally {
             ADBLog("Exiting opmode");
-            drive.Stop();
+            drive.stop();
             leftPusher.setPower(0);
             leftPusher.close();
             rightPusher.setPosition(0.1);
