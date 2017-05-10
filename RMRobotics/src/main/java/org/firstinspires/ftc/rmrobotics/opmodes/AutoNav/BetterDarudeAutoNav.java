@@ -223,7 +223,6 @@ public class BetterDarudeAutoNav extends LinearOpMode {
 
                 ADBLogReset();
                 ADBLog("Start");
-                new Thread(drive).start();
 
                 shootL.setPower(-1);
                 shootR.setPower(-1);

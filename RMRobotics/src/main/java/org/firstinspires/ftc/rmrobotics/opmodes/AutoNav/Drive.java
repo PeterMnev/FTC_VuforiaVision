@@ -3,7 +3,6 @@ package org.firstinspires.ftc.rmrobotics.opmodes.AutoNav;
 import android.util.Log;
 
 import com.kauailabs.navx.ftc.AHRS;
-import com.kauailabs.navx.ftc.navXPIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -19,11 +18,12 @@ import static java.lang.Thread.sleep;
  * Created by Peter on 1/26/2017.
  */
 
-public class Drive implements Runnable {
+public class Drive{
 
+
+    private static internalThread thrd;
     //runtime calculations
     ElapsedTime runtime = new ElapsedTime();
-
     // Opmode
     private LinearOpMode opmode = null;
 
@@ -117,7 +117,15 @@ public class Drive implements Runnable {
         navx_device.zeroYaw();
 
         //initalize a PID controller
-        yawPIDController = new ZPIDController(navx_device);
+        yawPIDController = new ZPIDController(navx_device,
+                new double[][] {
+                        {30, 0.11, 0},
+                        {18, 0.09, 0},
+                        {15.5, 0.075, 0},
+                        {13, 0.06, 0},
+                        {5, 0.01, 0}},
+                new double[][] {{20, 0.06, -10}},
+                new double[][] {{0, 0.02, 10}});
 
         /* Configure yaw PID controller */
         yawPIDController.setSetpoint(0);
@@ -127,22 +135,25 @@ public class Drive implements Runnable {
         yawPIDController.enable(true);
         yawPIDResult = new ZPIDController.PIDResult();
 
+        //thread things
+        thrd = new internalThread();
+        new Thread(thrd).start();
     }
 
     //Requested Vector
-    private volatile VectorF reqV = new VectorF(0, 0);
+//    private  VectorF reqV = new VectorF(0, 0);
 
-    //Power Vector - current direction of movement
-    private volatile VectorF powV = new VectorF(0, 0);
+
+
 
     //Difference between reqV and powV
-    private VectorF delV = new VectorF(0, 0);
 
-    //To check if there is a new reqV
-    private volatile boolean newReq = false;
+
+
+
 
     //Variables for managing how long a command lasts
-    private volatile double lastCommandTime = 0;
+
     private volatile double driveDuration = 0;
 
     //First movement method, uses encoders. Takes Angle heading (0 = front), power 0-1, and distance (depends on robot)
@@ -182,20 +193,14 @@ public class Drive implements Runnable {
     //A method used by several movement methods
     //maxDuration is the longest time that it can go, so it doesn't go forever if there is no new command
     public void VecDrive(double x, double y, double sp, int maxDuration) {
-        synchronized (reqV) {
-            //puts designated values
-            reqV.put(0, (float) x / 2);
-            reqV.put(1, (float) y);
-            //if values too small, sets it to 0 and  robot stops
-            if (reqV.magnitude() < 0.05) {
-                reqV.put(0, (float) 0);
-                reqV.put(1, (float) 0);
-            } else {
-                reqV.multiply(((float) sp) / reqV.magnitude());
-            }
-            lastCommandTime = runtime.milliseconds();
-            driveDuration = maxDuration;
-            newReq = true;
+
+        //puts designated values
+        x*=.5;
+        //if values too small, sets it to 0 and  robot stops
+        if ((Math.sqrt(Math.pow(x,2)+Math.pow(y,2))) < 0.05) {
+            thrd.setReq(0,0,maxDuration);
+        } else {
+            thrd.setReq((x*(sp/Math.sqrt(Math.pow(x,2) + Math.pow(y,2))))/2, y*(sp/Math.sqrt(Math.pow(x,2)+Math.pow(y,2))),maxDuration);
         }
     }
 
@@ -217,66 +222,30 @@ public class Drive implements Runnable {
 
     //Alternate VecDrive, incorporates voltage correction. Basically does things to reqV to determine the needed movement vector
     public void VecDriveBalanced(double x, double y, double sp, int maxDuration) {
-        synchronized (reqV) {
+        synchronized (this) {
             sp *= getVoltCoef();
-            reqV.put(0, (float) x);
-            reqV.put(1, (float) y);
-            if (reqV.magnitude() < 0.05) {
-                reqV.put(0, (float) 0);
-                reqV.put(1, (float) 0);
+
+
+            if ((Math.sqrt(Math.pow(x,2)+Math.pow(y,2))) < 0.05) {
+                thrd.setReq(0,0,maxDuration);
             } else {
-                reqV.multiply(((float) sp) / reqV.magnitude());
-                reqV.getData()[0] /= 2; // Adjust X power
+                //here is the multiplication by 1/2 that we added but never worked, may need to remove
+                thrd.setReq((x*(sp/Math.sqrt(Math.pow(x,2)+Math.pow(y,2))))/2,y*(sp/Math.sqrt(Math.pow(x,2)+Math.pow(y,2))),maxDuration);
             }
-            lastCommandTime = runtime.milliseconds();
             driveDuration = maxDuration;
-//            speed = sp;
-            newReq = true;
         }
     }
-
-    ////////////////////////////////////////////////////
-    // Main drive thread
-    ////////////////////////////////////////////////////
-    public volatile boolean running = true;
-
-    public void run() {
-        while (running && opmode.opModeIsActive()) {
-            //Places reqV into powV - now moves to that
-            if (newReq) {
-                synchronized (reqV) {
-                    newReq = false;
-                }
-            }
-            powV = reqV;
-            //When time runs out, the vector is set back to zero.
-            if (runtime.milliseconds() - lastCommandTime > driveDuration) {
-                // Stop
-                synchronized (reqV) {
-                    reqV.put(0, 0);
-                    reqV.put(1, 0);
-                    newReq = true;
-                }
-//                    BetterDarudeAutoNav.ADBLog("Running too long. Stop!");
-            }
-
-//                BetterDarudeAutoNav.ADBLog("Running. Current pow: " + powV.get(0) + ":" + powV.get(1));
-    //                BetterDarudeAutoNav.ADBLog("Running. Current req: " + reqV.get(0) + ":" + reqV.get(1));
-//                BetterDarudeAutoNav.ADBLog("Running. Current del: " + delV.get(0) + ":" + delV.get(1));
-            //sets movement angle based on vector components. also assigns motor power
-            setMovement(powV.get(0), powV.get(1), 1);
-        }
-
-        brake();
-        emergencyBrake();
+    public void brake() {
+        thrd.brake();
     }
 
-    //Stop method
-    public void Stop() {
-        brake();
-        running = false;
-        emergencyBrake();
+    public void Stop()
+    {
+        thrd.running = false;
+        thrd.brake();
     }
+
+
 
 
     private int prevLF = 0;
@@ -316,112 +285,34 @@ public class Drive implements Runnable {
     }
 
     //Method that is called from loop, sets motor power and uses pidcontroller to correct
-    public void setMovement(double x, double y, double power) {
-//        BetterDarudeAutoNav.ADBLog("Power: " + x + ", " + y);
-        // Rotate 90 degrees
 
-        //Variables for setting motor power. Scaled down to remain below 1.0
-        double Xr = 0.707 * x + 0.707 * y;
-        Xr *= power;
-        double Yr = 0.707 * x - 0.707 * y;
-        Yr *= power;
-        boolean moving = (Math.abs(Xr) + Math.abs(Yr)) > 0.001;
 
-        //This is used for rotating to the desired angle. note the details of PID controller that set it
-        try {
-            yawPIDController.setMoving(moving);
-            if (yawPIDController.waitForNewUpdate(yawPIDResult, GYRO_DEVICE_TIMEOUT_MS)) {
-                double av = yawPIDResult.angular_velocity;
-                double error = yawPIDResult.error;
-                if (yawPIDResult.isOnTarget()) {
-                    double flp = Xr;
-                    double frp = Yr;
-                    double blp = frp;
-                    double brp = flp;
-                    frontLeft.setPower(flp);
-                    frontRight.setPower(frp);
-                    backLeft.setPower(blp);
-                    backRight.setPower(brp);
-                   BetterDarudeAutoNav.ADBLog("On target motor speed: fl,br:" + flp + ", fr,bl: " + frp
-                            + ", err: " + error + ", av= " + av);
-                } else {
-                    double output = yawPIDResult.getOutput();
-                    double flp = Xr;
-                    double frp = Yr;
-                    double blp = frp;
-                    double brp = flp;
 
-                    if (!moving) {
-                        output = yawPIDResult.getStationaryOutput(0.1);
-                    }
 
-                    frontLeft.setPower(flp + output);
-                    frontRight.setPower(frp - output);
-                    backLeft.setPower(blp + output);
-                    backRight.setPower(brp - output);
-                    BetterDarudeAutoNav.ADBLog("Motor speed: fl,br:" + flp + ", fr,bl: " + frp
-                            + ", err: " + error + ",out: " + output + ", av= " + av);
-                }
-                // Calculate odometer
-//                double a = Math.toRadians(yawPIDController.prev_process_value);
-//                int new_LCount = frontLeft.getCurrentPosition();
-//                int new_RCount = frontRight.getCurrentPosition();
-//                int average = ((prevLCount - new_LCount) + (prevRCount - new_RCount))/2;
-//                deltaX += Math.cos(a)*average;
-//                deltaY += Math.sin(a)*average;
-//                prevLCount = new_LCount;
-//                prevRCount = new_RCount;
-//                BetterDarudeAutoNav.ADBLog("Odometer X: " + deltaX + ", Y:" + deltaY);
-            } else {
-                    /* A timeout occurred */
-                Log.d("navXDriveStraightOp", "Yaw PID waitForNewUpdate() TIMEOUT.");
-            }
-        } catch (Exception ex) {
-        }
-    }
 
-    //Sets the target vector to null, stopping the robot.
-    public void brake() {
-        synchronized (reqV) {
-            delV.put(0, 0);
-            delV.put(1, 0);
-            reqV.put(0, 0);
-            reqV.put(1, 0);
-            powV.put(0, 0);
-            powV.put(1, 0);
-            lastCommandTime = runtime.milliseconds();
-            driveDuration = 30000;
-        }
-    }
+//    public void brake_and_wait() {
+//        try {
+//            while (opmode.opModeIsActive()) {
+//                synchronized (reqV) {
+//                    delV.put(0, 0);
+//                    delV.put(1, 0);
+//                    reqV.put(0, 0);
+//                    reqV.put(1, 0);
+//                    powV.put(0, 0);
+//                    powV.put(1, 0);
+//                    lastCommandTime = runtime.milliseconds();
+//                    driveDuration = 30000;
+//                }
+//                if (!navx_device.isMoving()) break;
+////                BetterDarudeAutoNav.ADBLog("Waiting to stop");
+//                sleep(30);
+//            }
+//        } catch (InterruptedException ex) {
+//        }
+//    }
 
-    public void brake_and_wait() {
-        try {
-            while (opmode.opModeIsActive()) {
-                synchronized (reqV) {
-                    delV.put(0, 0);
-                    delV.put(1, 0);
-                    reqV.put(0, 0);
-                    reqV.put(1, 0);
-                    powV.put(0, 0);
-                    powV.put(1, 0);
-                    lastCommandTime = runtime.milliseconds();
-                    driveDuration = 30000;
-                }
-                if (!navx_device.isMoving()) break;
-//                BetterDarudeAutoNav.ADBLog("Waiting to stop");
-                sleep(30);
-            }
-        } catch (InterruptedException ex) {
-        }
-    }
 
-    //Sets motor power to 0, immediately stopping the robot
-    public void emergencyBrake() {
-        frontLeft.setPower(0);
-        frontRight.setPower(0);
-        backLeft.setPower(0);
-        backRight.setPower(0);
-    }
+
 
     //Finds the distance travelled using encoders - important for DriveByEncoders
     public int getDistance() {
@@ -482,6 +373,151 @@ public class Drive implements Runnable {
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
     }
+
+
+    class internalThread implements Runnable {
+        volatile double reqX = 0;
+        volatile double driveDuration = 0;
+        volatile double reqY = 0;
+        volatile double lastCommandTime = 0;
+        public volatile boolean running = true;
+
+        public void Stop() {
+            brake();
+            running = false;
+        }
+
+        public void setReq(double x, double y, double dd)
+        {
+            synchronized (this) {
+                reqX = x;
+                reqY = y;
+                driveDuration = dd;
+                lastCommandTime = runtime.milliseconds();
+                BetterDarudeAutoNav.ADBLog("reqX: " + reqX + " reqY: "+ reqY + " driveDuration:" + driveDuration);
+            }
+
+        }
+
+        public void run() {
+            while (running) {
+
+                double x,y, lct, dd;
+                synchronized (this) {
+                    x = reqX;
+                    y = reqY;
+                    lct = lastCommandTime;
+                    dd = driveDuration;
+                }
+
+                //When time runs out, the vector is set back to zero.
+                if (runtime.milliseconds() - lct > dd) {
+                    // Stop
+                    synchronized (this) {
+                        reqX = 0;
+                        reqY = 0;
+                        lastCommandTime = runtime.milliseconds();
+                        driveDuration = 30000;
+                    }
+//                    BetterDarudeAutoNav.ADBLog("Running too long. Stop!");
+                }
+
+//                BetterDarudeAutoNav.ADBLog("Running. Current pow: " + powV.get(0) + ":" + powV.get(1));
+                //                BetterDarudeAutoNav.ADBLog("Running. Current req: " + reqV.get(0) + ":" + reqV.get(1));
+//                BetterDarudeAutoNav.ADBLog("Running. Current del: " + delV.get(0) + ":" + delV.get(1));
+                //sets movement angle based on vector components. also assigns motor power
+
+                setMovement(x, y, 1);
+            }
+
+            brake();
+            emergencyBrake();
+        }
+
+        //Sets the target vector to null, stopping the robot.
+        public void brake() {
+            synchronized (this) {
+                reqY = 0;
+                reqX = 0;
+                lastCommandTime = runtime.milliseconds();
+                driveDuration = 30000;
+            }
+        }
+
+        //directly set motor values
+        public void emergencyBrake() {
+            frontLeft.setPower(0);
+            frontRight.setPower(0);
+            backLeft.setPower(0);
+            backRight.setPower(0);
+        }
+
+        //Method that is called from loop, sets motor power and uses pidcontroller to correct
+        public void setMovement(double x, double y, double power) {
+//        BetterDarudeAutoNav.ADBLog("Power: " + x + ", " + y);
+            // Rotate 90 degrees
+
+            //Variables for setting motor power. Scaled down to remain below 1.0
+            double Xr = 0.707 * x + 0.707 * y;
+            Xr *= power;
+            double Yr = 0.707 * x - 0.707 * y;
+            Yr *= power;
+            boolean moving = (Math.abs(Xr) + Math.abs(Yr)) > 0.001;
+
+            //This is used for rotating to the desired angle. note the details of PID controller that set it
+            try {
+                yawPIDController.setMoving(moving);
+                if (yawPIDController.waitForNewUpdate(yawPIDResult, GYRO_DEVICE_TIMEOUT_MS)) {
+                    double av = yawPIDResult.angular_velocity;
+                    double error = yawPIDResult.error;
+                    if (yawPIDResult.isOnTarget()) {
+                        double flp = Xr;
+                        double frp = Yr;
+                        double blp = frp;
+                        double brp = flp;
+                        frontLeft.setPower(flp);
+                        frontRight.setPower(frp);
+                        backLeft.setPower(blp);
+                        backRight.setPower(brp);
+                        BetterDarudeAutoNav.ADBLog("On target motor speed: fl,br:" + flp + ", fr,bl: " + frp
+                                + ", err: " + error + ", av= " + av);
+                    } else {
+                        double output = yawPIDResult.getOutput();
+                        double flp = Xr;
+                        double frp = Yr;
+                        double blp = frp;
+                        double brp = flp;
+
+                        if (!moving) {
+                            output = yawPIDResult.getStationaryOutput(0.1);
+                        }
+
+                        frontLeft.setPower(flp + output);
+                        frontRight.setPower(frp - output);
+                        backLeft.setPower(blp + output);
+                        backRight.setPower(brp - output);
+                        BetterDarudeAutoNav.ADBLog("Motor speed: fl,br:" + flp + ", fr,bl: " + frp
+                                + ", err: " + error + ",out: " + output + ", av= " + av);
+                    }
+                    // Calculate odometer
+//                double a = Math.toRadians(yawPIDController.prev_process_value);
+//                int new_LCount = frontLeft.getCurrentPosition();
+//                int new_RCount = frontRight.getCurrentPosition();
+//                int average = ((prevLCount - new_LCount) + (prevRCount - new_RCount))/2;
+//                deltaX += Math.cos(a)*average;
+//                deltaY += Math.sin(a)*average;
+//                prevLCount = new_LCount;
+//                prevRCount = new_RCount;
+//                BetterDarudeAutoNav.ADBLog("Odometer X: " + deltaX + ", Y:" + deltaY);
+                } else {
+                    /* A timeout occurred */
+                    Log.d("navXDriveStraightOp", "Yaw PID waitForNewUpdate() TIMEOUT.");
+                }
+            } catch (Exception ex) {
+            }
+        }
+    }
+
 }
 
 

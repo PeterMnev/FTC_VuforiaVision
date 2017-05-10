@@ -15,11 +15,12 @@ public class ZPIDController implements IDataArrivalSubscriber {
     private long prev_sensor_timestamp = 0L;
     private double error_current = 0.0D;
     private double error_previous = 0.0D;
-    private double error_total = 0.0D;
     private double p;
-    private double i;
-    private double d;
-    private double ff;
+
+    private double [][] Mrules; // Rules while moving forward
+    private double [][] Srules; // Rules while stationary
+    private double [][] Drules; // Rules while moving in wrong direction
+
     private double max_input = 0.0D;
     private double min_input = 0.0D;
     private double max_output = 1.0D;
@@ -62,14 +63,16 @@ public class ZPIDController implements IDataArrivalSubscriber {
             this.last_sensor_timestamp = 0L;
             this.error_current = 0.0D;
             this.error_previous = 0.0D;
-            this.error_total = 0.0D;
             this.result = 0.0D;
     }
 
-    public ZPIDController(AHRS navx_device) {
+    public ZPIDController(AHRS navx_device, double[][] mr, double[][] sr, double[][] dr) {
         this.navx_device = navx_device;
         this.setInputRange(-180.0D, 180.0D);
         navx_device.registerCallback(this);
+        Mrules = mr;
+        Srules = sr;
+        Drules = dr;
     }
 
     public void close() {
@@ -129,13 +132,47 @@ public class ZPIDController implements IDataArrivalSubscriber {
     // Calculates control values. This method is called from navX callback and synchronized by its
     // lock.
     public double stepController(double process_variable) {
-            error_current = setpoint - process_variable;
-            double absErr = Math.abs(error_current);
-            angular_velocity = (process_variable - prev_process_value)/
+        error_current = setpoint - process_variable;
+        double absErr = Math.abs(error_current);
+        double absAV = Math.abs(angular_velocity);
+
+        angular_velocity = (process_variable - prev_process_value)/
                     (last_sensor_timestamp - prev_sensor_timestamp);
 
-            double dump = 1;
+        double dump = 1;
 
+        if(angular_velocity == 0.0 || Math.signum(angular_velocity) == Math.signum(error_current)) {
+            if (!moving) {
+                int rn = 0;
+                while (rn < Mrules.length) {
+                    if ((Mrules[rn][1] < absAV) && Mrules[rn][0] > absErr) {
+                        dump = Mrules[rn][2];
+                        break;
+                    }
+                    rn++;
+                }
+            } else {
+                int rn = 0;
+                while (rn < Srules.length) {
+                    if ((Srules[rn][1] < absAV) && Srules[rn][0] > absErr) {
+                        dump = Srules[rn][2];
+                        break;
+                    }
+                    rn++;
+                }
+            }
+        } else {
+            int rn = 0;
+            while (rn < Drules.length) {
+                if ((Drules[rn][1] < absAV) && Drules[rn][0] > absErr) {
+                    dump = Drules[rn][2];
+                    break;
+                }
+                rn++;
+            }
+        }
+
+/*
             if(angular_velocity == 0.0 || Math.signum(angular_velocity) == Math.signum(error_current)) {
                 // Turning in the right direction
                 if(!moving) {
@@ -147,11 +184,11 @@ public class ZPIDController implements IDataArrivalSubscriber {
                         dump = 0; // brake
                     } else if (Math.abs(angular_velocity) > 0.06 && absErr < 13) {
                         dump = 0; // brake
-                    } else if (absErr < 5 && Math.abs(angular_velocity) > 0.01) {
+                    } else if (Math.abs(angular_velocity) > 0.01 && absErr < 5) {
                         dump = 0;  // stop just before target
                     }
                 } else {
-                    if (absErr < 20 && Math.abs(angular_velocity) > 0.06) {
+                    if (Math.abs(angular_velocity) > 0.06 && absErr < 20) {
                         dump = -10;  // stop rotation
                     } else if (Math.abs(angular_velocity) > 0.09 && absErr < 25) {
                         dump = 0; // brake
@@ -166,7 +203,7 @@ public class ZPIDController implements IDataArrivalSubscriber {
             } else {
                 // Turning in the wrong direction, apply maz correction
                 if(Math.abs(angular_velocity) > 0.02) dump = 10;
-            }
+            } */
 //            BetterDarudeAutoNav.ADBLog("av: " + angular_velocity + ", err: " + absErr + ", dump: " + dump + ", mov: " + moving);
 
 //            double inp_range;
@@ -263,7 +300,6 @@ public class ZPIDController implements IDataArrivalSubscriber {
         this.enabled = false;
         this.error_current = 0.0D;
         this.error_previous = 0.0D;
-        this.error_total = 0.0D;
         this.result = 0.0D;
     }
 
