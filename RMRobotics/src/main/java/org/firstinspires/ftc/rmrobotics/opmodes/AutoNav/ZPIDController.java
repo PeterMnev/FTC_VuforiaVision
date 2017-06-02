@@ -2,6 +2,11 @@ package org.firstinspires.ftc.rmrobotics.opmodes.AutoNav;
 
 import com.kauailabs.navx.ftc.AHRS;
 import com.kauailabs.navx.ftc.IDataArrivalSubscriber;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
+
+import java.util.ArrayDeque;
 
 /**
  * Created by Peter on 2/1/2017.
@@ -16,6 +21,9 @@ public class ZPIDController implements IDataArrivalSubscriber {
     private double error_current = 0.0D;
     private double error_previous = 0.0D;
     private double p;
+
+    private LinearOpMode logmode = null;
+    private boolean debug = false;
 
     private double [][] Mrules; // Rules while moving forward
     private double [][] Srules; // Rules while stationary
@@ -66,10 +74,11 @@ public class ZPIDController implements IDataArrivalSubscriber {
             this.result = 0.0D;
     }
 
-    public ZPIDController(AHRS navx_device, double[][] mr, double[][] sr, double[][] dr) {
+    public ZPIDController(AHRS navx_device, double[][] mr, double[][] sr, double[][] dr, boolean log) {
         this.navx_device = navx_device;
         this.setInputRange(-180.0D, 180.0D);
         navx_device.registerCallback(this);
+        debug = log;
         Mrules = mr;
         Srules = sr;
         Drules = dr;
@@ -229,7 +238,11 @@ public class ZPIDController implements IDataArrivalSubscriber {
             }
 
             prev_process_value = process_variable;
+        if (debug)
+        {
+            BetterDarudeAutoNav.ADBLog("Angle: " + prev_process_value + ", AVel: " + angular_velocity + ", Res: " + result + ", error: " + (Math.signum(angular_velocity) == Math.signum(error_current)) + ", moving: " + (moving));
 
+        }
             return result;
     }
 

@@ -116,16 +116,19 @@ public class Drive{
         // Reset yaw
         navx_device.zeroYaw();
 
+        //change whether or not you want the ADB Log to be enabled false = no log
+        boolean log = true;
+
         //initalize a PID controller
         yawPIDController = new ZPIDController(navx_device,
                 new double[][] {
-                        {30, 0.11, 0},
+                        {24, 0.11, 0},
                         {18, 0.09, 0},
                         {15.5, 0.075, 0},
                         {13, 0.06, 0},
                         {5, 0.01, 0}},
                 new double[][] {{20, 0.06, -10}},
-                new double[][] {{0, 0.02, 10}});
+                new double[][] {{0, 0.02, 10}},log);
 
         /* Configure yaw PID controller */
         yawPIDController.setSetpoint(0);
@@ -178,7 +181,7 @@ public class Drive{
 
         try {
             while (opmode.opModeIsActive()) {
-                BetterDarudeAutoNav.ADBLog("TurnToAngle: Yaw=" + navx_device.getYaw() + ", AV=" + yawPIDController.getAV());
+                //BetterDarudeAutoNav.ADBLog("TurnToAngle: Yaw=" + navx_device.getYaw() + ", AV=" + yawPIDController.getAV());
                 if (Math.abs(navx_device.getYaw() - heading) < TOLERANCE_DEGREES
                         && Math.abs(yawPIDController.getAV()) < 0.01) break;
                 sleep(20);
@@ -325,8 +328,8 @@ public class Drive{
         c = backRight.getCurrentPosition();
         r += Math.abs(c - prevBREnc);
 
-//        BetterDarudeAutoNav.ADBLog("Distance: " + frontLeft.getCurrentPosition() + ", " + frontRight.getCurrentPosition() + ", " +
-//                backLeft.getCurrentPosition() + ", " + backRight.getCurrentPosition() + ", r:" + r);
+        BetterDarudeAutoNav.ADBLog("Distance: " + frontLeft.getCurrentPosition() + ", " + frontRight.getCurrentPosition() + ", " +
+                backLeft.getCurrentPosition() + ", " + backRight.getCurrentPosition() + ", r:" + r);
         //ratio that reduces the size of values (encoders are in the 1000, this brings them to the 100)
         return r * 16 / 100;
     }
@@ -394,7 +397,7 @@ public class Drive{
                 reqY = y;
                 driveDuration = dd;
                 lastCommandTime = runtime.milliseconds();
-                BetterDarudeAutoNav.ADBLog("reqX: " + reqX + " reqY: "+ reqY + " driveDuration:" + driveDuration);
+                //BetterDarudeAutoNav.ADBLog("reqX: " + reqX + " reqY: "+ reqY + " driveDuration:" + driveDuration);
             }
 
         }

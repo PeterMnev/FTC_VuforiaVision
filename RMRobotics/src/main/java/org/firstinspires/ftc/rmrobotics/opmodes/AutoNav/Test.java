@@ -4,6 +4,7 @@
 
 package org.firstinspires.ftc.rmrobotics.opmodes.AutoNav;
 
+import android.view.ViewDebug;
 import android.widget.ImageView;
 
 import com.kauailabs.navx.ftc.AHRS;
@@ -195,16 +196,33 @@ public class Test extends LinearOpMode {
         try {
             ADBLogReset();
             ADBLog("Start");
+//            drive.Stop();
+//            sleep(100);
+//            ADBLog(Integer.toString(drive.testBackLeft(1)));
+//            sleep(700);
+//            ADBLog(Integer.toString(drive.testBackLeft(0)));
+//            sleep(100);
+//            ADBLog(Integer.toString(drive.testBackRight(1)));
+//            sleep(700);
+//            ADBLog(Integer.toString(drive.testBackRight(0)));
+//            sleep(100);
+//            ADBLog(Integer.toString(drive.testFrontLeft(1)));
+//            sleep(700);
+//            ADBLog(Integer.toString(drive.testFrontLeft(0)));
+//            sleep(100);
+//            ADBLog(Integer.toString(drive.testFrontRight(1)));
+//            sleep(700);
+//            ADBLog(Integer.toString(drive.testFrontRight(0)));
+//            sleep(100);
 
 
             ADBLog("Start test");
-            ADBLog("Drive forwards a little bit");
 
-            drive.DriveByEncoders(0 * dir, 0.2, 200);
-
+            drive.DriveByEncoders(0,1,200);
             ADBLog("rotate 90 degrees");
-            drive.TurnToAngle(90 * dir);
-            stop();
+            drive.DriveByEncoders(-45,1,500);
+            drive.DriveByEncoders(0,1,800);
+            drive.brake();
 
 
         } finally {
