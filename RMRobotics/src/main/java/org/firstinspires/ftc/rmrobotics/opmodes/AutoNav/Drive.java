@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 
 import static java.lang.Thread.sleep;
 
@@ -131,7 +130,7 @@ public class Drive{
                 new double[][] {{0, 0.02, 10}},log);
 
         /* Configure yaw PID controller */
-        yawPIDController.setSetpoint(0);
+        yawPIDController.setSetPoint(0);
         yawPIDController.setOutputRange(MIN_MOTOR_OUTPUT_VALUE / 2, MAX_MOTOR_OUTPUT_VALUE / 2);
         yawPIDController.setTolerance(TOLERANCE_DEGREES);
         yawPIDController.setP(YAW_PID_P);
@@ -165,7 +164,7 @@ public class Drive{
 
         resetDistance();
         VecDrive(10, 0, power, 20000);
-        yawPIDController.setSetpoint(heading);
+        yawPIDController.setSetPoint(heading);
         while (opmode.opModeIsActive()) {
             int d = getDistance();
             if (d > distance) break;
@@ -177,7 +176,7 @@ public class Drive{
 
     //Second movement method, uses NavX only to rotate to desired position
     public void TurnToAngle(double heading) {
-        yawPIDController.setSetpoint(heading);
+        yawPIDController.setSetPoint(heading);
 
         try {
             while (opmode.opModeIsActive()) {

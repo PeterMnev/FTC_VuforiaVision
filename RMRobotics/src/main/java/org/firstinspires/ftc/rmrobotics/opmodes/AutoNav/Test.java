@@ -220,8 +220,12 @@ public class Test extends LinearOpMode {
 
             drive.DriveByEncoders(0,1,200);
             ADBLog("rotate 90 degrees");
-            drive.DriveByEncoders(-45,1,500);
+            drive.DriveByEncoders(45,1,500);
             drive.DriveByEncoders(0,1,800);
+            drive.brake();
+            drive.TurnToAngle(180);
+            sleep(1000);
+            drive.DriveByEncoders(180,1,300);
             drive.brake();
 
 

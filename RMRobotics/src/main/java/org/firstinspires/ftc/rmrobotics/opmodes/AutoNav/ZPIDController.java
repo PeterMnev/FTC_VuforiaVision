@@ -4,10 +4,6 @@ import com.kauailabs.navx.ftc.AHRS;
 import com.kauailabs.navx.ftc.IDataArrivalSubscriber;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
-
-import java.util.ArrayDeque;
-
 /**
  * Created by Peter on 2/1/2017.
  */
@@ -35,7 +31,7 @@ public class ZPIDController implements IDataArrivalSubscriber {
     private double min_output = -1.0D;
     private double tolerance_amount;
     private boolean enabled = false;
-    private double setpoint = 0.0D;
+    private double setPoint = 0.0D;
     private double result = 0.0D;
 
     private boolean moving = false; // Is robot currently commanded to move
@@ -141,7 +137,28 @@ public class ZPIDController implements IDataArrivalSubscriber {
     // Calculates control values. This method is called from navX callback and synchronized by its
     // lock.
     public double stepController(double process_variable) {
-        error_current = setpoint - process_variable;
+        //// FIXME: 6/2/2017
+
+
+        if (Math.abs(setPoint - process_variable) > 180)
+        {
+            if (setPoint - process_variable < 0) {
+                error_current = setPoint - process_variable + 360;
+            }
+            else
+            {
+                error_current = setPoint - process_variable - 360;
+            }
+        }
+        else
+        {
+//old
+            error_current = setPoint - process_variable;
+
+        }
+
+
+
         double absErr = Math.abs(error_current);
         double absAV = Math.abs(angular_velocity);
 
@@ -268,28 +285,33 @@ public class ZPIDController implements IDataArrivalSubscriber {
         if(min_input <= max_input) {
             this.min_input = min_input;
             this.max_input = max_input;
-            setSetpoint(setpoint);
+            setSetPoint(setPoint);
         }
     }
 
-    public synchronized void setSetpoint(double setpoint) {
+    public synchronized void setSetPoint(double setPoint) {
+
         if(max_input > min_input) {
-            if(setpoint > max_input) {
-                this.setpoint = max_input;
-            } else if(setpoint < min_input) {
-                this.setpoint = min_input;
+            if(setPoint > max_input) {
+                this.setPoint -= max_input;
+                this.setPoint *= -1;
+            } else if(setPoint < min_input) {
+                this.setPoint -= min_input;
+                this.setPoint *= -1;
             } else {
-                this.setpoint = setpoint;
+                this.setPoint = setPoint;
             }
         } else {
-            this.setpoint = setpoint;
+            this.setPoint = setPoint;
         }
+
+        //to fix
 
 //        this.stepController(this.error_previous, 0);
     }
 
-    public synchronized double getSetpoint() {
-        return this.setpoint;
+    public synchronized double getSetPoint() {
+        return this.setPoint;
     }
 
     public synchronized double getAV() { return angular_velocity; }
