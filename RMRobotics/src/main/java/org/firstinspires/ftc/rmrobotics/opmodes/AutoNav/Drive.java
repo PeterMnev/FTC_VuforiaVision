@@ -19,7 +19,7 @@ import static java.lang.Thread.sleep;
 
 public class Drive{
 
-
+    //internal thread
     private static internalThread thrd;
     //runtime calculations
     ElapsedTime runtime = new ElapsedTime();
@@ -127,7 +127,8 @@ public class Drive{
                         {13, 0.06, 0},
                         {5, 0.01, 0}},
                 new double[][] {{20, 0.06, -10}},
-                new double[][] {{0, 0.02, 10}},log);
+                new double[][] {{0, 0.02, 10}},
+                log);
 
         /* Configure yaw PID controller */
         yawPIDController.setSetPoint(0);
@@ -137,7 +138,7 @@ public class Drive{
         yawPIDController.enable(true);
         yawPIDResult = new ZPIDController.PIDResult();
 
-        //thread things
+        //thread init
         thrd = new internalThread();
         new Thread(thrd).start();
     }
@@ -154,11 +155,7 @@ public class Drive{
 
 
 
-    //Variables for managing how long a command lasts
-
-    private volatile double driveDuration = 0;
-
-    //First movement method, uses encoders. Takes Angle heading (0 = front), power 0-1, and distance (depends on robot)
+    //First movement method, uses encoders. Takes Angle heading (0 = front, negative = left, up to -180, positive = right up to 180), power 0-1, and distance (depends on robot)
     //This method drives straight with designated power, and all the while rotates to the designated heading
     public void DriveByEncoders(double heading, double power, int distance) {
 
@@ -234,7 +231,6 @@ public class Drive{
                 //here is the multiplication by 1/2 that we added but never worked, may need to remove
                 thrd.setReq((x*(sp/Math.sqrt(Math.pow(x,2)+Math.pow(y,2))))/2,y*(sp/Math.sqrt(Math.pow(x,2)+Math.pow(y,2))),maxDuration);
             }
-            driveDuration = maxDuration;
         }
     }
     public void brake() {

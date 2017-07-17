@@ -223,7 +223,7 @@ public class BetterDarudeAutoNav extends LinearOpMode {
 
                 ADBLogReset();
                 ADBLog("Start");
-
+                //this part is the code that makes the robot move around, mostly encoder controlled
                 shootL.setPower(-1);
                 shootR.setPower(-1);
                 drive.DriveByEncoders(0, 0.4, 335);
@@ -257,9 +257,11 @@ public class BetterDarudeAutoNav extends LinearOpMode {
                 double d = 1000;
                 while (opModeIsActive()) {
                     ADBLog("Starting approach");
+                    //calls the vuforia approach using the first target
                     d = Approach(firstTarget);
                     ADBLog("Approached with Xerror = " + d);
 
+                    //
                     if (Math.abs(d) < RECOGNITION_TOLER_X) {
                         boolean success = RecognizeAndPush(cfg.isRed);
                         if (success) break;

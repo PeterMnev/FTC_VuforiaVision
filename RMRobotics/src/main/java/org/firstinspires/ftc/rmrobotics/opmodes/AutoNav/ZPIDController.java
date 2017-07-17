@@ -21,9 +21,9 @@ public class ZPIDController implements IDataArrivalSubscriber {
     private LinearOpMode logmode = null;
     private boolean debug = false;
 
-    private double [][] Mrules; // Rules while moving forward
-    private double [][] Srules; // Rules while stationary
-    private double [][] Drules; // Rules while moving in wrong direction
+    private double [][] StaticRules; // Rules while moving forward
+    private double [][] MovingRules; // Rules while stationary
+    private double [][] DerpRules; // Rules while moving in wrong direction
 
     private double max_input = 0.0D;
     private double min_input = 0.0D;
@@ -38,9 +38,68 @@ public class ZPIDController implements IDataArrivalSubscriber {
     private double angular_velocity = 0.0D;
     private double prev_process_value = 0;
 
+
+    // Sets the zero angle to be the angle the robot is at right now
+    public synchronized void yawReset() {
+            this.last_sensor_timestamp = 0L;
+            this.error_current = 0.0D;
+            this.error_previous = 0.0D;
+            this.result = 0.0D;
+    }
+
+    // Initialization
+    public ZPIDController(AHRS navx_device, double[][] sr, double[][] mr, double[][] dr, boolean log) {
+        this.navx_device = navx_device;
+        this.setInputRange(-180.0D, 180.0D);
+        navx_device.registerCallback(this);
+        debug = log;
+        StaticRules = sr;
+        MovingRules = mr;
+        DerpRules = dr;
+    }
+
+    public void close() {
+        this.enable(false);
+        this.navx_device.deregisterCallback(this);
+    }
+
+    // Block calling thread until new data available from sensor and control value is calculated.
+    public synchronized boolean waitForNewUpdate(ZPIDController.PIDResult result, int timeout_ms) throws InterruptedException {
+        // If new data already available, return it immediately
+        boolean ready = isNewUpdateAvailable(result);
+
+        // Exit loop when new data are available or thread is being interrupted.
+        while(!ready && !Thread.currentThread().isInterrupted()) {
+            // Yield lock to callback method
+            wait((long)timeout_ms);
+            ready = isNewUpdateAvailable(result);
+        }
+
+        return ready;
+    }
+    // Checking whether or not the PID controller has newer data, comparing to provided 'result'.
+    // If yes, return true and store data into result.!!!!!
+    // This function does not block the thread that calls it.
+    // Called from the waitForNewUpdate method, which is a blocking method that waits for new update.
+    public synchronized boolean isNewUpdateAvailable(ZPIDController.PIDResult result) {
+        boolean new_data_available;
+        if(enabled && result.timestamp < last_sensor_timestamp) {
+            new_data_available = true;
+            result.on_target = isOnTarget();
+            result.output = get();
+            result.timestamp = last_sensor_timestamp;
+            result.angular_velocity = angular_velocity;
+            result.error = error_current;
+        } else {
+            new_data_available = false;
+        }
+
+        return new_data_available;
+    }
+
     // These two methods are callbacks from IDataArrivalSubscriber interface.
-    // NavX thread calls them when new data are available from sensor.
-    // We don't use untimestamped callback, since we expect navX micro to give timestamps/
+    // NavX thread calls them when new data is available from sensor.
+    // We don't use untimestamped callback, since we expect navX micro to give timestamps
     public void untimestampedDataReceived(long curr_system_timestamp, Object kind) {}
 
     // curr_sensor_timestamp is a time when data was measured by sensor, not when it was received
@@ -63,70 +122,17 @@ public class ZPIDController implements IDataArrivalSubscriber {
         }
     }
 
-    public synchronized void yawReset() {
-            this.last_sensor_timestamp = 0L;
-            this.error_current = 0.0D;
-            this.error_previous = 0.0D;
-            this.result = 0.0D;
-    }
-
-    public ZPIDController(AHRS navx_device, double[][] mr, double[][] sr, double[][] dr, boolean log) {
-        this.navx_device = navx_device;
-        this.setInputRange(-180.0D, 180.0D);
-        navx_device.registerCallback(this);
-        debug = log;
-        Mrules = mr;
-        Srules = sr;
-        Drules = dr;
-    }
-
-    public void close() {
-        this.enable(false);
-        this.navx_device.deregisterCallback(this);
-    }
-
-    // Checking weather PID controller have newer data, comparing to provided 'result'.
-    // If yes, return true and store data into result.
-    // This function does not block thread that calls it.
-    public synchronized boolean isNewUpdateAvailable(ZPIDController.PIDResult result) {
-        boolean new_data_available;
-        if(enabled && result.timestamp < last_sensor_timestamp) {
-            new_data_available = true;
-            result.on_target = isOnTarget();
-            result.output = get();
-            result.timestamp = last_sensor_timestamp;
-            result.angular_velocity = angular_velocity;
-            result.error = error_current;
-        } else {
-            new_data_available = false;
-        }
-
-        return new_data_available;
-    }
-
-    // Block calling thread until new data available from sensor and control value is calculated.
-    public synchronized boolean waitForNewUpdate(ZPIDController.PIDResult result, int timeout_ms) throws InterruptedException {
-        // If new data already available, return it immediately
-        boolean ready = isNewUpdateAvailable(result);
-
-        // Exit loop when new data are available or thread is being interrupted.
-        if(!ready && !Thread.currentThread().isInterrupted()) {
-            // Yield lock to callback method
-            wait((long)timeout_ms);
-            ready = isNewUpdateAvailable(result);
-        }
-
-        return ready;
-    }
-
+    //returns the differential between control and desired angle
     public double getError() {
         return error_current;
     }
+
 
     public synchronized void setTolerance(double tolerance_amount) {
         this.tolerance_amount = tolerance_amount;
     }
 
+    //determines whether the robot is on target angle direction
     public boolean isOnTarget() {
         boolean on_target = false;
         on_target = Math.abs(this.getError()) < this.tolerance_amount;
@@ -137,8 +143,9 @@ public class ZPIDController implements IDataArrivalSubscriber {
     // Calculates control values. This method is called from navX callback and synchronized by its
     // lock.
     public double stepController(double process_variable) {
-        //// FIXME: 6/2/2017
 
+
+        //finds current error value. set point determined by setSetPoint, limited from -180 to 180, as is proccess variable (navx default)
 
         if (Math.abs(setPoint - process_variable) > 180)
         {
@@ -152,126 +159,94 @@ public class ZPIDController implements IDataArrivalSubscriber {
         }
         else
         {
-//old
             error_current = setPoint - process_variable;
-
         }
 
+        //caclulates angular velocity
+        angular_velocity = (process_variable - prev_process_value)/
+                (last_sensor_timestamp - prev_sensor_timestamp);
 
-
+        //absolute values for future use
         double absErr = Math.abs(error_current);
         double absAV = Math.abs(angular_velocity);
 
-        angular_velocity = (process_variable - prev_process_value)/
-                    (last_sensor_timestamp - prev_sensor_timestamp);
+
 
         double dump = 1;
 
+        //determines dump value based on the array of values established
+
         if(angular_velocity == 0.0 || Math.signum(angular_velocity) == Math.signum(error_current)) {
+            //if the robot is not moving in any particular direction, turning in place
             if (!moving) {
                 int rn = 0;
-                while (rn < Mrules.length) {
-                    if ((Mrules[rn][1] < absAV) && Mrules[rn][0] > absErr) {
-                        dump = Mrules[rn][2];
+                while (rn < StaticRules.length) {
+                    if ((StaticRules[rn][1] < absAV) && StaticRules[rn][0] > absErr) {
+                        dump = StaticRules[rn][2];
                         break;
                     }
                     rn++;
                 }
+            //if the robot is moving
             } else {
                 int rn = 0;
-                while (rn < Srules.length) {
-                    if ((Srules[rn][1] < absAV) && Srules[rn][0] > absErr) {
-                        dump = Srules[rn][2];
+                while (rn < MovingRules.length) {
+                    if ((MovingRules[rn][1] < absAV) && MovingRules[rn][0] > absErr) {
+                        dump = MovingRules[rn][2];
                         break;
                     }
                     rn++;
                 }
             }
+            //if the robot has overcorrected (angular velocity is opposite to the direction of error)
         } else {
             int rn = 0;
-            while (rn < Drules.length) {
-                if ((Drules[rn][1] < absAV) && Drules[rn][0] > absErr) {
-                    dump = Drules[rn][2];
+            while (rn < DerpRules.length) {
+                if ((DerpRules[rn][1] < absAV) && DerpRules[rn][0] > absErr) {
+                    dump = DerpRules[rn][2];
                     break;
                 }
                 rn++;
             }
         }
 
-/*
-            if(angular_velocity == 0.0 || Math.signum(angular_velocity) == Math.signum(error_current)) {
-                // Turning in the right direction
-                if(!moving) {
-                    if (Math.abs(angular_velocity) > 0.11 && absErr < 30) {
-                        dump = 0; // brake
-                    } else if (Math.abs(angular_velocity) > 0.09 && absErr < 18) {
-                        dump = 0; // brake
-                    } else if (Math.abs(angular_velocity) > 0.075 && absErr < 15.5) {
-                        dump = 0; // brake
-                    } else if (Math.abs(angular_velocity) > 0.06 && absErr < 13) {
-                        dump = 0; // brake
-                    } else if (Math.abs(angular_velocity) > 0.01 && absErr < 5) {
-                        dump = 0;  // stop just before target
-                    }
-                } else {
-                    if (Math.abs(angular_velocity) > 0.06 && absErr < 20) {
-                        dump = -10;  // stop rotation
-                    } else if (Math.abs(angular_velocity) > 0.09 && absErr < 25) {
-                        dump = 0; // brake
-                    } else if (Math.abs(angular_velocity) > 0.075 && absErr < 21) {
-                        dump = 0; // brake
-                    } else if (Math.abs(angular_velocity) > 0.06 && absErr < 17) {
-                        dump = 0; // brake
-                    }
-                }
 
-//                else if(absErr < 20) adjP /=1.7;
-            } else {
-                // Turning in the wrong direction, apply maz correction
-                if(Math.abs(angular_velocity) > 0.02) dump = 10;
-            } */
-//            BetterDarudeAutoNav.ADBLog("av: " + angular_velocity + ", err: " + absErr + ", dump: " + dump + ", mov: " + moving);
-
-//            double inp_range;
-//            if(continuous) {
-//                inp_range = max_input - min_input;
-//                if(absErr > inp_range / 2.0D) {
-//                    if(error_current > 0.0D) {
-//                        error_current -= inp_range;
-//                    } else {
-//                        error_current += inp_range;
-//                    }
-//                }
-//            }
-
+            // calculates result based on P value (modifiable), the resulting dump value and current error.
             result = p * error_current * dump;
 
+            //sets previous values based on current ones
             error_previous = error_current;
+            prev_process_value = process_variable;
 
+        //corrects if output is out of bounds
             if(result > max_output) {
                 result = max_output;
             } else if(result < min_output) {
                 result = min_output;
             }
 
-            prev_process_value = process_variable;
         if (debug)
         {
             BetterDarudeAutoNav.ADBLog("Angle: " + prev_process_value + ", AVel: " + angular_velocity + ", Res: " + result + ", error: " + (Math.signum(angular_velocity) == Math.signum(error_current)) + ", moving: " + (moving));
 
         }
+
             return result;
     }
 
+    //sets the P value in "PID", only one we modify as it is the only one we use.
     public synchronized void setP(double p) {
         this.p = p;
 //        this.stepController(this.error_previous, 0);
     }
 
+    //extra method for getting result without recalculating
     public synchronized double get() {
         return result;
     }
 
+
+    //establishes the output range for the PID controller, default is 1 to -1, however it is changed to -.5 to .5 in the Drive class (based on motor limitations)
     public synchronized void setOutputRange(double min_output, double max_output) {
         if(min_output <= max_output) {
             this.min_output = min_output;
@@ -281,6 +256,7 @@ public class ZPIDController implements IDataArrivalSubscriber {
 //        this.stepController(this.error_previous, 0);
     }
 
+
     public synchronized void setInputRange(double min_input, double max_input) {
         if(min_input <= max_input) {
             this.min_input = min_input;
@@ -289,21 +265,13 @@ public class ZPIDController implements IDataArrivalSubscriber {
         }
     }
 
+    //converts setpoint into useable range (-180 to 180) and then assigns it to the class variable
     public synchronized void setSetPoint(double setPoint) {
+        setPoint += 180;
+        setPoint %= 360;
+        setPoint -= 180;
+        this.setPoint = setPoint;
 
-        if(max_input > min_input) {
-            if(setPoint > max_input) {
-                this.setPoint -= max_input;
-                this.setPoint *= -1;
-            } else if(setPoint < min_input) {
-                this.setPoint -= min_input;
-                this.setPoint *= -1;
-            } else {
-                this.setPoint = setPoint;
-            }
-        } else {
-            this.setPoint = setPoint;
-        }
 
         //to fix
 
@@ -317,8 +285,10 @@ public class ZPIDController implements IDataArrivalSubscriber {
     public synchronized double getAV() { return angular_velocity; }
     public synchronized double getErr() { return error_current; }
 
+    //if robot is not just rotating!
     public synchronized void setMoving(boolean m) { moving = m; }
 
+    //method for resetting the controller
     public synchronized void enable(boolean enabled) {
         this.enabled = enabled;
         if(!enabled) {
@@ -338,6 +308,7 @@ public class ZPIDController implements IDataArrivalSubscriber {
         this.result = 0.0D;
     }
 
+//This is a container class that carries the values developped in the controller, it is released only when new data is found. (notifyAll must be called as the other thread is waiting)
     public static class PIDResult {
         public double output = 0.0D;
         public long timestamp = 0L;
