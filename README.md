@@ -1,50 +1,39 @@
-FTC Vuforia Vision
+## FTC Vuforia Vision
 
-Part 1: The Drive Class
+### Part 1: The Drive Class
 
-a.	Why use this library:
-	i.	Vector based
-		1.	Many sensors report position as coordinates in X-Y space relative to some target. For instance Vuforia reports distance and offset from a beacon. These coordinates are the vector pointing to the target which typically needs to be converted to polar coordinates to control standard Mecanum drive vehicles. The advantage of this class is that it takes a direction vector as an input, thus avoiding extra calculations.
-	ii.	Voltage Drop Correction
-		1.	Library has the ability to increase the assigned power if the voltage drops, thus providing more predictable behavior with low battery.
-	iii.	Optimized predictive Turn Controller
-		1.	Turn controller can be configured to provide the fastest turn speeds by predicting robot position and avoiding oversteering. The controller can minimize oscillations while turning and prevent overcorrecting multiple times. 
-b.	Description
+Why use this library:
+1.	Vector based
+    -	Many sensors report position as coordinates in X-Y space relative to some target. For instance Vuforia reports distance and offset from a beacon. These coordinates are the vector pointing to the target which typically needs to be converted to polar coordinates to control standard Mecanum drive vehicles. The advantage of this class is that it takes a direction vector as an input, thus avoiding extra calculations.
+2.	Voltage Drop Correction
+    -	Library has the ability to increase the assigned power if the voltage drops, thus providing more predictable behavior with low battery.
+3.	Optimized predictive Turn Controller
+    -	Turn controller can be configured to provide the fastest turn speeds by predicting robot position and avoiding oversteering. The controller can minimize oscillations while turning and prevent overcorrecting multiple times. 
 
-Class declaration
 
-The Drive Class
+### Drive Class Declaration
 
-Constructor
-
-Drive(DcMotor frontLeftMotor, DcMotor frontRightMotor, DcMotor backLeftMotor, DcMotor backRightMotor, AHRS navXDevice, Telemetry telemetry, LinearOpMode opMode)
-
+#### Constructor
+```
+Drive(DcMotor frontLeftMotor, 
+DcMotor frontRightMotor, 
+DcMotor backLeftMotor, 
+DcMotor backRightMotor, 
+AHRS navXDevice, 
+Telemetry telemetry, 
+LinearOpMode opMode)
+```
 Creates a new Drive object
 
-Methods
+#### Methods
 
-Mod/Typ Method and Description
-
-void DriveByEncoders(double heading, double power, int distance)
-
-Drives a specified distance (arbitrary units, vary from robot to robot – depend on drivetrain) in the specified direction (angle measured from -180 to 180, 0 is the front of the robot), at specified power.
-
-void TurnToAngle(double heading)
-	
-Turns in place to a specified angle.
-
-void VecDrive(double x, double y, double power, int maxDuration)
-	
-Drives on a vector with specified power for specified amount of time. X is forwards, Y is side to side. Use in conjunction with sensor e.g. Vuforia to provide constant updates, or set a specified vector and then a wait statement to maintain that vector. Make sure the wait statement does not exceed maxDuration, or you will simply get the maxDuration.
-
-void VecDriveBalanced(double x, double y, double power, int maxDuration)
-	
-Drives on a vector with specified power for specified amount of time. Uses Voltage Correction to account for voltage drop. Usage same as VecDrive.
-
-void ReverseDirection()
-	
-Can be used to configure motors so that it functions as a proper mecanum drive system.
-
+| Method | Description |
+|-----------------------------|------------------------|
+|void DriveByEncoders(double heading, double power, int distance)| Drives a specified distance (arbitrary units, vary from robot to robot – depend on drivetrain) in the specified direction (angle measured from -180 to 180, 0 is the front of the robot), at specified power.|
+|void TurnToAngle(double heading)| Turns in place to a specified angle. |
+|void VecDrive(double x, double y, double power, int maxDuration)|Drives on a vector with specified power for specified amount of time. X is forwards, Y is side to side. Use in conjunction with sensor e.g. Vuforia to provide constant updates, or set a specified vector and then a wait statement to maintain that vector. Make sure the wait statement does not exceed maxDuration, or you will simply get the maxDuration.|
+|void VecDriveBalanced(double x, double y, double power, int maxDuration)|Drives on a vector with specified power for specified amount of time. Uses Voltage Correction to account for voltage drop. Usage same as VecDrive.|
+|void ReverseDirection()|Can be used to configure motors so that it functions as a proper mecanum drive system.|
 
 
 i.	The drive class is one that is in charge of regulating the motor power levels. It can take information from sensors, encoders and others. The ones built in are nav-x (w/ pid controller for rotation) and encoders for distance travel.
