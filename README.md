@@ -71,4 +71,5 @@ Creates a new Drive object
     4.	In the class you have several other options, which includes creating drive modes – for instance, you can create a new one that includes some other corrective variable. One example is the VecDriveBalanced included mode, which incorporates the voltage and gets voltage coefficients that adjust the returned power values if there has been a voltage drop. Another example is changing the scaling on the x-value in VecDrive/VecDriveBalanced. Currently it is scaled down by 2 because the robot goes robot forwards faster than it does sideways.  This correction makes similar x and y values give similar speeds. (x = forward and backward from center of robot). This will likely differ for your robot, especially if you do not use mecanum drive.
     5.	An example of a method you can create is a test method which will power up one motor at a time.
 
-![LOL](http://i.imgur.com/5u3rdjM.png)
+#### Flowchart displaying the function of the Drive Class in conjunction with the NavX
+![Flowchart](http://i.imgur.com/5u3rdjM.png)
