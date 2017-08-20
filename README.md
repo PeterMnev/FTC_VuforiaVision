@@ -29,7 +29,7 @@ Creates a new Drive object
 
 | Method | Description |
 |-----------------------------|------------------------|
-|`void DriveByEncoders(double heading, double power, int distance)`| Drives a specified distance (arbitrary units, vary from robot to robot – depend on drivetrain) in the specified direction (angle measured from -180 to 180, 0 is the front of the robot), at specified power. If you specify a non-zero heading, the robot will turn and move in a straight line, not using mecanum drive. Important note: This method **blocks** the main opmode until the right encoder values are reached. If a new command is not sent after this is reached, the robot will continue with the same heading and power. This is done to ensure smooth transitions between commands. |
+|`void DriveByEncoders(double heading, double power, int distance)`| This method is best used for driving across large distances. It does not use mecanum capabilities, that is, maintaining current robot orientation while moving in any direction. Instead, the robot simply rotates to the specified heading as it moves forward. There are three parameters: heading, which is measured from -180 to 180, with 0 being the front of the robot at start, power, the speed with which you want the robot to go, and distance which is an arbitrary unit that varies across robots. This method will run until the specified distance is reached according data from *encoders*. This method also **blocks** the main opmode while the encoder values are below the threshold. If a new command is not sent after this is reached, the robot will continue with the same heading and power. This is done to ensure smooth transitions between commands. |
 |`void TurnToAngle(double heading)`| Turns in place to a specified angle. |
 |`void VecDrive(double x, double y, double power, int maxDuration)`|Drives on a vector with specified power for specified amount of time. X is forwards, Y is side to side. The robot **will** use Mecanum drive capabilities if you use this method. Best for use in conjunction with sensor e.g. Vuforia to provide constant updates, or set a specified vector and then a wait statement to maintain that vector. Make sure the wait statement does not exceed maxDuration, or you will simply get the maxDuration.|
 |`void VecDriveBalanced(double x, double y, double power, int maxDuration)`|Drives on a vector with specified power for specified amount of time. Uses Voltage Correction to account for voltage drop. Usage same as VecDrive.|
@@ -42,6 +42,8 @@ drive.DriveByEncoders(45,1,500); //Without stopping, continues moving 45 degrees
 drive.brake(); //Stops 
 drive.TurnToAngle(180); //Rotates to 180 degrees, facing the direction opposite to what it started with.
 ```
+Experimenting with encoders on a mecanum drived showed that the encoders could not be reliably used for mecanum driving. Additionally, it showed that simply turning and then driving straight is faster than attempting to use mecanum capabilities. The best use of sideways driving is with the VecDrive methods across very small distances where you have access to supporting data from sensors and not just encoders. 
+
 #### Image depicting what the above code will make the robot do:
 ![Path](http://i.imgur.com/kygFhsu.png)
 
