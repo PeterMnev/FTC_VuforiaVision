@@ -29,7 +29,7 @@ Creates a new Drive object
 
 | Method | Description |
 |-----------------------------|------------------------|
-|void DriveByEncoders(double heading, double power, int distance)| Drives a specified distance (arbitrary units, vary from robot to robot – depend on drivetrain) in the specified direction (angle measured from -180 to 180, 0 is the front of the robot), at specified power.|
+|void DriveByEncoders(double heading, double power, int distance)| Drives a specified distance (arbitrary units, vary from robot to robot – depend on drivetrain) in the specified direction (angle measured from -180 to 180, 0 is the front of the robot), at specified power. Important note: This method **blocks** the main opmode until the right encoder values are reached. If a new command is not sent after this is reached, the robot will continue with the same heading and power. This is done to ensure smooth transitions between commands. |
 |void TurnToAngle(double heading)| Turns in place to a specified angle. |
 |void VecDrive(double x, double y, double power, int maxDuration)|Drives on a vector with specified power for specified amount of time. X is forwards, Y is side to side. Use in conjunction with sensor e.g. Vuforia to provide constant updates, or set a specified vector and then a wait statement to maintain that vector. Make sure the wait statement does not exceed maxDuration, or you will simply get the maxDuration.|
 |void VecDriveBalanced(double x, double y, double power, int maxDuration)|Drives on a vector with specified power for specified amount of time. Uses Voltage Correction to account for voltage drop. Usage same as VecDrive.|
