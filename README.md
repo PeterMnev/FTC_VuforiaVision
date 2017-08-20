@@ -29,11 +29,19 @@ Creates a new Drive object
 
 | Method | Description |
 |-----------------------------|------------------------|
-|void DriveByEncoders(double heading, double power, int distance)| Drives a specified distance (arbitrary units, vary from robot to robot – depend on drivetrain) in the specified direction (angle measured from -180 to 180, 0 is the front of the robot), at specified power. Important note: This method **blocks** the main opmode until the right encoder values are reached. If a new command is not sent after this is reached, the robot will continue with the same heading and power. This is done to ensure smooth transitions between commands. |
+|void DriveByEncoders(double heading, double power, int distance)| Drives a specified distance (arbitrary units, vary from robot to robot – depend on drivetrain) in the specified direction (angle measured from -180 to 180, 0 is the front of the robot), at specified power. If you specify a non-zero heading, the robot will turn and move in a straight line, not using mecanum drive. Important note: This method **blocks** the main opmode until the right encoder values are reached. If a new command is not sent after this is reached, the robot will continue with the same heading and power. This is done to ensure smooth transitions between commands. |
 |void TurnToAngle(double heading)| Turns in place to a specified angle. |
-|void VecDrive(double x, double y, double power, int maxDuration)|Drives on a vector with specified power for specified amount of time. X is forwards, Y is side to side. Use in conjunction with sensor e.g. Vuforia to provide constant updates, or set a specified vector and then a wait statement to maintain that vector. Make sure the wait statement does not exceed maxDuration, or you will simply get the maxDuration.|
+|void VecDrive(double x, double y, double power, int maxDuration)|Drives on a vector with specified power for specified amount of time. X is forwards, Y is side to side. The robot **will** use Mecanum drive capabilities if you use this method. Best for use in conjunction with sensor e.g. Vuforia to provide constant updates, or set a specified vector and then a wait statement to maintain that vector. Make sure the wait statement does not exceed maxDuration, or you will simply get the maxDuration.|
 |void VecDriveBalanced(double x, double y, double power, int maxDuration)|Drives on a vector with specified power for specified amount of time. Uses Voltage Correction to account for voltage drop. Usage same as VecDrive.|
 |void ReverseDirection()|Can be used to configure motors so that it functions as a proper mecanum drive system.|
+
+#### Example Implementation: Move straight, move at an angle then stop and rotate in place.
+```Java
+drive.DriveByEncoders(0,1,200); //Moves straight
+drive.DriveByEncoders(45,1,500); //Without stopping, continues moving 45 degrees to the right
+drive.brake(); //Stops 
+drive.TurnToAngle(180); //Rotates to 180 degrees, ending facing towards where it started. 
+```
 
 1. Description
     1.	The drive class is one that is in charge of regulating the motor power levels. It can take information from sensors, encoders and others. The ones built in are nav-x (w/ pid controller for rotation) and encoders for distance travel.
