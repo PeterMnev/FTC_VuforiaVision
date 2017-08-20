@@ -37,10 +37,10 @@ Creates a new Drive object
 
 #### Example Implementation: Move straight, move at an angle then stop and rotate in place.
 ```Java
-drive.DriveByEncoders(0,1,200); //Moves straight
-drive.DriveByEncoders(45,1,500); //Without stopping, continues moving 45 degrees to the right
+drive.DriveByEncoders(0,1,200); //Moves straight for 200 units with a power setting of 1.
+drive.DriveByEncoders(45,1,500); //Without stopping, continues moving 45 degrees to the right for 500 units with a power setting of 1.
 drive.brake(); //Stops 
-drive.TurnToAngle(180); //Rotates to 180 degrees, ending facing towards where it started. 
+drive.TurnToAngle(180); //Rotates to 180 degrees, facing the direction opposite to what it started with.
 ```
 
 1. Description
