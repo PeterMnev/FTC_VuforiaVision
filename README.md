@@ -42,6 +42,8 @@ drive.DriveByEncoders(45,1,500); //Without stopping, continues moving 45 degrees
 drive.brake(); //Stops 
 drive.TurnToAngle(180); //Rotates to 180 degrees, facing the direction opposite to what it started with.
 ```
+#### Image depicting what the above code will make the robot do:
+![Path](http://i.imgur.com/kygFhsu.png)
 
 1. Description
     1.	The drive class is one that is in charge of regulating the motor power levels. It can take information from sensors, encoders and others. The ones built in are nav-x (w/ pid controller for rotation) and encoders for distance travel.
