@@ -60,6 +60,7 @@ Creates a new Drive object
                 
                 | Error, in degrees | Angular Velocity Degrees/Milliseconds | Correction Desired. ‘Dump’ |
                 |-----------------------------|------------------------|---------|
+                |##|##|##|
                 
                 The program will check two things, first it checks if the error is smaller than the designated error, then it will check that the angular velocity is GREATER than the designated AV. If this is true, it will set the dump value, to the designated dump value, which is usually zero in this case because you would like the robot to stop moving. If the conditions are not met, it will move onto the next row and check if any other conditions are met. If none are met, it reverts to the default dump value and uses whatever correction the PID controller demands based on the current angle of the robot.
          
