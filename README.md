@@ -5,10 +5,10 @@
 Why use this library:
 1.	Vector based
     -	Many sensors report position as coordinates in X-Y space relative to some target. For instance Vuforia reports distance and offset from a beacon. These coordinates are the vector pointing to the target which typically needs to be converted to polar coordinates to control standard Mecanum drive vehicles. The advantage of this class is that it takes a direction vector as an input, thus avoiding extra calculations.
-2.	Voltage Drop Correction
-    -	Library has the ability to increase the assigned power if the voltage drops, thus providing more predictable behavior with low battery.
-3.	Optimized predictive Turn Controller
-    -	Turn controller can be configured to provide the fastest turn speeds by predicting robot position and avoiding oversteering. The controller can minimize oscillations while turning and prevent overcorrecting multiple times. 
+2. Optimized predictive Turn Controller
+    -	Turn controller can be configured to provide the fastest turn speeds by predicting robot position and avoiding oversteering. The controller can minimize oscillations while turning and prevent overcorrecting multiple times.
+3.	Voltage Drop Correction
+    -	Library has the ability to increase the assigned power if the voltage drops, thus providing more predictable behavior with low battery. 
 
 
 ### Drive Class Declaration
@@ -29,16 +29,20 @@ Creates a new Drive object
 
 | Method | Description |
 |-----------------------------|------------------------|
-|`void DriveByEncoders(double heading, double power, int distance)`| This method is best used for driving across large distances. It does not use mecanum capabilities, that is, maintaining current robot orientation while moving in any direction. Instead, the robot simply rotates to the specified heading as it moves forward. There are three parameters: heading, which is measured from -180 to 180, with 0 being the front of the robot at start, power, the speed with which you want the robot to go, and distance which is an arbitrary unit that varies across robots. This method will run until the specified distance is reached according data from *encoders*. This method also **blocks** the main opmode while the encoder values are below the threshold. If a new command is not sent after this is reached, the robot will continue with the same heading and power. This is done to ensure smooth transitions between commands. |
+|`void DriveByEncoders(double heading, double power, int distance)`| This method is best used for driving across large distances. It does not use mecanum capabilities, that is, maintaining current robot orientation while moving in any direction. Instead, the robot simply rotates to the specified heading as it moves forward. There are three parameters: 
+- heading, which is measured from -180 to 180, with 0 being the front of the robot during opmod initialization
+- power, the speed with which you want the robot to go
+- distance which is derived from encoders. It is an arbitrary unit that varies across robots. 
+This method will block calling thread until the specified distance is reached according data from *encoders*. If a new command is not sent after it returns, the robot will continue with the same heading and power. This is done to ensure smooth transitions between commands. |
 |`void TurnToAngle(double heading)`| Turns in place to a specified angle. |
-|`void VecDrive(double x, double y, double power, int maxDuration)`|Drives on a vector with specified power for specified amount of time. X is forwards, Y is side to side. The robot **will** use Mecanum drive capabilities if you use this method. Best for use in conjunction with sensor e.g. Vuforia to provide constant updates, or set a specified vector and then a wait statement to maintain that vector. Make sure the wait statement does not exceed maxDuration, or you will simply get the maxDuration.|
-|`void VecDriveBalanced(double x, double y, double power, int maxDuration)`|Drives on a vector with specified power for specified amount of time. Uses Voltage Correction to account for voltage drop. Usage same as VecDrive.|
+|`void VecDrive(double x, double y, double power, int maxDuration)`|Drives in the diretion pointed by the vector with specified power for specified amount of time. X is forwards, Y is side to side, relative to the current robot heading. This method **will** use Mecanum drive capabilities, while maintaining robot orientation relative to the field. Best for use for small adjustments in front of your target. This method *does not block* calling thread, this is needed to allow for constant check on its position relative to the target. When new command is issued, it immediately cancels the current one. maxDuration limits how long it will run if no other commands is recieved to prevent robot running away if something goes wrong.|
+|`void VecDriveBalanced(double x, double y, double power, int maxDuration)`|Same as VecDrive, but uses Voltage Correction to account for voltage drop.|
 |`void ReverseDirection()`|Can be used to configure motors so that it functions as a proper mecanum drive system.|
 |`void brake()`| Used to stop the robot.|
 #### Example Implementation: Move straight, move at an angle then stop and rotate in place.
 ```Java
 drive.DriveByEncoders(0,1,200); //Moves straight for 200 units with a power setting of 1.
-drive.DriveByEncoders(45,1,500); //Without stopping, continues moving 45 degrees to the right for 500 units with a power setting of 1.
+drive.DriveByEncoders(45,1,500); //Without stopping, continues turning 45 degrees to the right for 500 units with a power setting of 1.
 drive.brake(); //Stops 
 drive.TurnToAngle(180); //Rotates to 180 degrees, facing the direction opposite to what it started with.
 ```
