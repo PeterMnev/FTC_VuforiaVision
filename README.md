@@ -62,21 +62,23 @@ See the flowchart below for a clearer picture.
 3.	Construct drive class.
 4.	If needed, use ReverseDirection to reverse motor directions.
 5.	From opmode class, call different drive methods to move your robot.
+
 ### Configuration and fine tuning
-1.	The Drive class is very versatile and can be customized for your needs.
-2.	Adjustable class constants:
+The Drive class is very versatile and can be customized for your needs.
+#### Adjustable class constants
 - YAW_PID_P – this constant regulates the PID controller for rotation, greater values result in stronger, faster rotations. We used .013, this will likely differ.
 - Tolerance degrees, how close to the desired angle you want the robot to run to. Default = 2.0
 - MIN/MAX Motor output values – change if you wish to reduce the maximum speed of the robot. Default -1/1
 - GYRO_DEVICE_TIMEOUT_MS – Default 500, for navx setup. Change not recommended
-3. In constructor:
--   One of the most important changeable elements is the rotation PID controller constants, it allows you to adjust how when to stop giving power to the drive train or when to counteract overcorrection. 
--	These values can be changed from the yawPIDController constructor.
--	The elements are as follows: navx device, Static Rotation Rules, Moving Rotation Rules, Overcorrected Rotation rules, and “Log” Boolean (default true)
-- Predictive rules for ZPIDController. Those rules change correction force as robot approaches assigned heading while turning. All rules are represented by an array of following format:
-                || Error, in degrees || Angular Velocity Degrees/Milliseconds || 'Dumpening' multiplier ||
-                |-----------------------------|------------------------|---------|
-                |##|##|##|
+#### In constructor
+One of the most important changeable elements is the rotation PID controller predictive rules which allow you to adjust where to stop turn when approaching correct heading and how to counteract overcorrection. 
+These rules are represented by 3 arrays that are passed to yawPIDController constructor.
+All rules are represented by an array of the following format:
+
+| Error, in degrees | Angular Velocity Degrees/Milliseconds | 'Dumpening' multiplier |
+|-----------------------------|------------------------|---------|
+|##|##|##|
+
 When using rules, controller checks two things, first it checks if the error is smaller than the designated error, then it will check that the angular velocity is GREATER than AV specified in a rule. If this is true, it will set the dumpening value, to the designated dumpening value, which is usually zero in this case because you would like the robot to stop rotating. If the conditions are not met, it will move onto the next row and check if any other conditions are met. If none are met, it reverts to the default dumpening value of 1 (no dumpening) and uses whatever correction the PID controller demands based on the current angle of the robot.
 The negative dumpening value can be used to counteract rotation if overcorrection is expected.                
 1.	Static Rotation Rules are used when robot rotates while stationary.
