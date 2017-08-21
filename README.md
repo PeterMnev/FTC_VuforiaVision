@@ -26,7 +26,7 @@ LinearOpMode opMode)
 Creates a new Drive object
 
 #### Methods
-Experimenting with encoders on a mecanum drived showed that the encoders could not be reliably used for mecanum driving. Additionally, it showed that simply turning and then driving straight is faster than attempting to use mecanum capabilities. The best use of sideways driving is with the VecDrive methods across very small distances where you have access to supporting data from sensors and not just encoders.
+Experimenting with encoders on a mecanum drive showed that the encoders could not be reliably used for mecanum driving. Additionally, it showed that when going for large distances, simply turning and then driving straight is faster than attempting to use mecanum capabilities. The best use of sideways driving is with the VecDrive methods across very small distances where you have access to supporting data from sensors and not just encoders.
 
 | Method | Description |
 |-----------------------------|------------------------|
