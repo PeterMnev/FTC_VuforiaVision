@@ -72,7 +72,7 @@ See the flowchart below for a clearer picture.
         -	These values can be changed from the yawPIDController constructor.
         -	The elements are as follows: navx device, Static Rotation Rules, Moving Rotation Rules, Overcorrected Rotation rules, and “Log” Boolean (default true)
         All rules are represented by an array of following format:
-                | Error, in degrees | Angular Velocity Degrees/Milliseconds | 'Dumpening' multiplier |
+                || Error, in degrees || Angular Velocity Degrees/Milliseconds || 'Dumpening' multiplier ||
                 |-----------------------------|------------------------|---------|
                 |##|##|##|
         When using rules, controller checks two things, first it checks if the error is smaller than the designated error, then it will check that the angular velocity is GREATER than AV specified in a rule. If this is true, it will set the dumpening value, to the designated dumpening value, which is usually zero in this case because you would like the robot to stop rotating. If the conditions are not met, it will move onto the next row and check if any other conditions are met. If none are met, it reverts to the default dumpening value of 1 (no dumpening) and uses whatever correction the PID controller demands based on the current angle of the robot.
