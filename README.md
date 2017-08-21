@@ -87,8 +87,8 @@ The negative dumpening value can be used to counteract rotation if overcorrectio
 #### Other parameters
 In the class you have several other parameters that can be tweaked. In VecDriveBalanced there are coefficients that adjust the requested power values according to voltage drop. Another example is changing the scaling on the x-value in VecDrive/VecDriveBalanced. Currently it is scaled down by 2 because the mecanum drives goes forwards faster than it does sideways.  This correction makes similar x and y values give similar speeds. (x = forward and backward from center of robot). This will likely differ for different types of robots.
 
-#### Example
+### Example
 An example of a method you can create is a test method which will power up one motor at a time.
 
-#### Flowchart displaying the function of the Drive Class in conjunction with the NavX
+### Flowchart displaying the function of the Drive Class in conjunction with the NavX
 ![Flowchart](http://i.imgur.com/5u3rdjM.png)
