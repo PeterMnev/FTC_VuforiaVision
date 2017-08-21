@@ -26,7 +26,7 @@ LinearOpMode opMode)
 Creates a new Drive object
 
 #### Methods
-
+Experimenting with encoders on a mecanum drived showed that the encoders could not be reliably used for mecanum driving. Additionally, it showed that simply turning and then driving straight is faster than attempting to use mecanum capabilities. The best use of sideways driving is with the VecDrive methods across very small distances where you have access to supporting data from sensors and not just encoders. 
 | Method | Description |
 |-----------------------------|------------------------|
 |`void DriveByEncoders(double heading, double power, int distance)`| This method is best used for driving across large distances. It does not use mecanum capabilities, that is, maintaining current robot orientation while moving in any direction. Instead, the robot simply rotates to the specified heading as it moves forward. There are three parameters: **heading**, which is measured from -180 to 180, with 0 being the front of the robot during opmod initialization, **power**, the speed with which you want the robot to go, **distance** which is derived from encoders. It is an arbitrary unit that varies across robots. This method will block calling thread until the specified distance is reached according data from *encoders*. If a new command is not sent after it returns, the robot will continue with the same heading and power. This is done to ensure smooth transitions between commands. |
@@ -42,7 +42,6 @@ drive.DriveByEncoders(45,1,500); //Without stopping, continues turning 45 degree
 drive.brake(); //Stops 
 drive.TurnToAngle(180); //Rotates to 180 degrees, facing the direction opposite to what it started with.
 ```
-Experimenting with encoders on a mecanum drived showed that the encoders could not be reliably used for mecanum driving. Additionally, it showed that simply turning and then driving straight is faster than attempting to use mecanum capabilities. The best use of sideways driving is with the VecDrive methods across very small distances where you have access to supporting data from sensors and not just encoders. 
 
 #### Image depicting what the above code will make the robot do:
 ![Path](http://i.imgur.com/kygFhsu.png)
