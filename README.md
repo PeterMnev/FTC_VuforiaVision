@@ -38,10 +38,11 @@ Experimenting with encoders on a mecanum drive showed that the encoders could no
 |`void brake()`| Used to stop the robot.|
 #### Example Implementation: Move straight, move at an angle then stop and rotate in place.
 ```Java
-drive.DriveByEncoders(0,1,200); //Moves straight for 200 units with a power setting of 1.
-drive.DriveByEncoders(45,1,500); //Without stopping, continues turning 45 degrees to the right for 500 units with a power setting of 1.
-drive.brake(); //Stops 
-drive.TurnToAngle(180); //Rotates to 180 degrees, facing the direction opposite to what it started with.
+drive.DriveByEncoders(0,1,200);     // Moves straight for 200 units with a power setting of 1.
+drive.DriveByEncoders(45,1,500);    // Without stopping, continues turning 45 degrees to the right 
+                                    // for 500 units with a power setting of 1.
+drive.brake();                      //Stops 
+drive.TurnToAngle(180);             //Rotates to 180 degrees, facing the direction opposite to what it started with.
 ```
 
 #### Image depicting what the above code will make the robot do:
