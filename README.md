@@ -15,13 +15,14 @@ Why use this library:
 
 #### Constructor
 ``` Java
-Drive(DcMotor frontLeftMotor, 
-DcMotor frontRightMotor, 
-DcMotor backLeftMotor, 
-DcMotor backRightMotor, 
-AHRS navXDevice, 
-Telemetry telemetry, 
-LinearOpMode opMode)
+Drive(
+    DcMotor frontLeftMotor, // Four drive motors
+    DcMotor frontRightMotor, 
+    DcMotor backLeftMotor, 
+    DcMotor backRightMotor, 
+    AHRS navXDevice,        // navX
+    Telemetry telemetry,    // OpMode telemetry object
+    LinearOpMode opMode)    // Opmode
 ```
 Creates a new Drive object
 
@@ -48,17 +49,18 @@ drive.TurnToAngle(180);             //Rotates to 180 degrees, facing the directi
 #### Image depicting what the above code will make the robot do:
 ![Path](http://i.imgur.com/kygFhsu.png)
 
-1. Description
-    1.	The drive class is one that is in charge of regulating the motor power levels. It can take information from sensors, encoders and others. The ones built in are nav-x (w/ pid controller for rotation) and encoders for distance travel.
-    2.	The drive class has its own thread which continuously updates the motor values based on new information.
-    3.	The nav-x is its own separate thread which blocks the drive thread until new information is received. See the flowchart for a clearer picture.
-2.	Usage:
+### Description
+The Drive class is one that is in charge of controlling mecanum drivetrain motors. It uses information from navX gyro sensor to maintain robots orientation relative to the field and encoders for measuring distance travelled.
+The drive class has its own thread which control robot's movements, while main opmode thread is free to check position sensors. 
+The navX has its own separate thread which calculates robot orientation few dozen times a second. 
+See the flowchart below for a clearer picture.
+### Usage
     1.	Initialize drive motors. Do not assign directions here.
     2.	Initialize nav_x device.
-    3.	Construct drive class (only on constructor available)
+    3.	Construct drive class.
     4.	If needed, use ReverseDirection to reverse motor directions.
-    5.	From opmode class, call different drive methods to control the motor power values.
-3.	Configuration
+    5.	From opmode class, call different drive methods to move your robot.
+### Configuration and fine tuning
     1.	The Drive class is very versatile and can be customized for your needs.
     2.	Adjustable class constants:
         -	YAW_PID_P – this constant regulates the PID controller for rotation, greater values result in stronger, faster rotations. We used .013, this will likely differ.
@@ -69,20 +71,16 @@ drive.TurnToAngle(180);             //Rotates to 180 degrees, facing the directi
         -   One of the most important changeable elements is the rotation PID controller constants, it allows you to adjust how when to stop giving power to the drive train or when to counteract overcorrection. 
         -	These values can be changed from the yawPIDController constructor.
         -	The elements are as follows: navx device, Static Rotation Rules, Moving Rotation Rules, Overcorrected Rotation rules, and “Log” Boolean (default true)
-            1.	Static Rotation Rules is a 3x# array of rules:
-                
-                | Error, in degrees | Angular Velocity Degrees/Milliseconds | Correction Desired. ‘Dump’ |
+        All rules are represented by an array of following format:
+                | Error, in degrees | Angular Velocity Degrees/Milliseconds | 'Dumpening' multiplier |
                 |-----------------------------|------------------------|---------|
                 |##|##|##|
-                
-                The program will check two things, first it checks if the error is smaller than the designated error, then it will check that the angular velocity is GREATER than the designated AV. If this is true, it will set the dump value, to the designated dump value, which is usually zero in this case because you would like the robot to stop moving. If the conditions are not met, it will move onto the next row and check if any other conditions are met. If none are met, it reverts to the default dump value and uses whatever correction the PID controller demands based on the current angle of the robot.
-         
-             2.	Moving Rotation Rules
-                This is for situations where the robot is moving in a line but is also needing to turn at an angle. The checks are the same as those for the static rotation rules. However, it is recommended to use a negative dump value… ?
-          
-             3.	Finally is the Overcorrected Rotation Rules, which regulates how strong you want the reaction to overcorrection to be. The same checks apply. Use a positive dump value… ?
-             4.	The log is for constructor purposes only.
-    4.	In the class you have several other options, which includes creating drive modes – for instance, you can create a new one that includes some other corrective variable. One example is the VecDriveBalanced included mode, which incorporates the voltage and gets voltage coefficients that adjust the returned power values if there has been a voltage drop. Another example is changing the scaling on the x-value in VecDrive/VecDriveBalanced. Currently it is scaled down by 2 because the robot goes robot forwards faster than it does sideways.  This correction makes similar x and y values give similar speeds. (x = forward and backward from center of robot). This will likely differ for your robot, especially if you do not use mecanum drive.
+        When using rules, controller checks two things, first it checks if the error is smaller than the designated error, then it will check that the angular velocity is GREATER than AV specified in a rule. If this is true, it will set the dumpening value, to the designated dumpening value, which is usually zero in this case because you would like the robot to stop rotating. If the conditions are not met, it will move onto the next row and check if any other conditions are met. If none are met, it reverts to the default dumpening value of 1 (no dumpening) and uses whatever correction the PID controller demands based on the current angle of the robot.
+        The negative dumpening value can be used to counteract rotation if overcorrection is expected.                
+        1.	Static Rotation Rules are used when robot rotates while stationary.
+        2.	Moving Rotation Rules are used when the robot is moving forward but is also needing to change heading.          
+        3.	Finally is the Overcorrected Rotation Rules, which are used when robot overcorrected - rotated **past** requested heading **and** continues rotating in the wrong direction. You likely want 'dumpening' to be more than 1 in this case to cease overcorrection as soon as possible.             
+    4.	In the class you have several other parameters that can be tweaked. In VecDriveBalanced there are coefficients that adjust the requested power values according to voltage drop. Another example is changing the scaling on the x-value in VecDrive/VecDriveBalanced. Currently it is scaled down by 2 because the mecanum drives goes forwards faster than it does sideways.  This correction makes similar x and y values give similar speeds. (x = forward and backward from center of robot). This will likely differ for different types of robots.
     5.	An example of a method you can create is a test method which will power up one motor at a time.
 
 #### Flowchart displaying the function of the Drive Class in conjunction with the NavX
